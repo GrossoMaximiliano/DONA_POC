@@ -1,0 +1,1835 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Impulso Ciudadano — prototipo conceptual de plataforma municipal de donaciones para instituciones públicas de Las Toscas, Santa Fe. Demostración con datos ficticios: no se procesan pagos.">
+<meta name="theme-color" content="#163B46">
+<title>Impulso Ciudadano · Municipalidad de Las Toscas — Prototipo conceptual</title>
+<style>
+/* ============ TOKENS DE DISEÑO ============ */
+:root{
+  --petroleo:#163B46;
+  --petroleo-2:#0F2C35;
+  --teal:#1E766E;
+  --teal-osc:#175D57;
+  --teal-suave:#E7F2EE;
+  --verde:#70C6A7;
+  --marfil:#F7F7F2;
+  --blanco:#FFFFFF;
+  --tinta:#202D32;
+  --tinta-2:#5E6C70;
+  --borde:#E4E9E5;
+  --pista:#E9EFEA;
+  --ambar:#F2C078;
+  --ambar-suave:#FBEFD9;
+  --ambar-tinta:#6B4E12;
+  --error:#A93B26;
+  --error-suave:#FBEFEB;
+  --fuente:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --s1:0 1px 2px rgba(22,59,70,.05),0 10px 30px -18px rgba(22,59,70,.22);
+  --s2:0 2px 6px rgba(22,59,70,.08),0 24px 48px -24px rgba(22,59,70,.32);
+  --r1:10px;--r2:16px;--r3:22px;
+}
+/* ============ RESET Y BASE ============ */
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:84px;-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--marfil);color:var(--tinta);font-family:var(--fuente);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
+h1,h2,h3,h4{margin:0;line-height:1.2}
+p{margin:0}
+img,svg{display:block;max-width:100%}
+a{color:var(--teal)}
+button,input,select,textarea{font:inherit;color:inherit}
+ul,ol{margin:0;padding:0}
+::selection{background:var(--verde);color:var(--petroleo)}
+:focus-visible{outline:3px solid var(--teal);outline-offset:2px;border-radius:6px}
+.sobre-oscuro :focus-visible,.pie :focus-visible{outline-color:var(--ambar)}
+.sr-solo{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+.salto{position:absolute;left:-999px;top:0;z-index:100;background:var(--teal);color:#fff;font-weight:700;padding:.75rem 1.1rem;border-radius:0 0 var(--r1) 0;text-decoration:none}
+.salto:focus{left:0}
+.contenedor{width:min(1120px,100% - 2.5rem);margin-inline:auto}
+.ico{width:20px;height:20px;flex:none;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.ico--grande{width:28px;height:28px}
+/* ============ BOTONES ============ */
+.boton{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;min-height:48px;padding:.7rem 1.3rem;border-radius:12px;border:1.5px solid transparent;background:var(--teal);color:#fff;font-weight:700;font-size:.98rem;cursor:pointer;text-decoration:none;text-align:center;transition:background .2s ease,border-color .2s ease,color .2s ease,transform .15s ease,box-shadow .2s ease}
+.boton:hover{background:var(--teal-osc)}
+.boton:active{transform:translateY(1px)}
+.boton--oscuro{background:var(--petroleo)}
+.boton--oscuro:hover{background:var(--petroleo-2)}
+.boton--contorno{background:#fff;color:var(--petroleo);border-color:#D5DED8}
+.boton--contorno:hover{border-color:var(--teal);background:#F2F7F3;color:var(--teal-osc)}
+.boton--claro{background:rgba(255,255,255,.14);color:#fff;border-color:rgba(255,255,255,.32)}
+.boton--claro:hover{background:rgba(255,255,255,.24)}
+.boton--fantasma{background:transparent;color:var(--tinta-2);border-color:transparent}
+.boton--fantasma:hover{background:#EDF1EC;color:var(--petroleo)}
+.boton--bloque{width:100%}
+.boton--compacto{min-height:44px;padding:.5rem 1rem;font-size:.92rem}
+.boton[disabled]{opacity:.55;cursor:not-allowed}
+.boton .ico{width:18px;height:18px}
+.chip{display:inline-flex;align-items:center;gap:.4rem;min-height:42px;padding:.35rem 1rem;border-radius:999px;border:1.5px solid var(--borde);background:#fff;color:var(--tinta);font-weight:600;font-size:.9rem;cursor:pointer;transition:background .2s,border-color .2s,color .2s}
+.chip:hover{border-color:var(--teal);color:var(--teal-osc)}
+.chip[aria-pressed="true"]{background:var(--petroleo);border-color:var(--petroleo);color:#fff}
+/* ============ CINTA DE DEMOSTRACIÓN ============ */
+.cinta-demo{position:relative;background:var(--ambar);color:#4A3610;font-size:.8rem;font-weight:600}
+.cinta-demo__inner{display:flex;align-items:center;justify-content:center;gap:.55rem;padding:.42rem 2.4rem;text-align:center}
+.cinta-demo .ico{width:16px;height:16px}
+.cinta-demo__cerrar{position:absolute;right:.3rem;top:50%;transform:translateY(-50%);width:34px;height:34px;display:grid;place-items:center;background:none;border:0;border-radius:8px;cursor:pointer;color:#4A3610}
+.cinta-demo__cerrar:hover{background:rgba(74,54,16,.12)}
+@keyframes aparecer{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes dibujar{to{stroke-dashoffset:0}}
+@keyframes flotar{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+.vista{animation:aparecer .35s ease}
+.flotar{animation:flotar 6s ease-in-out infinite}
+/* ============ MOVIMIENTO REDUCIDO ============ */
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important}
+}
+/* ============ ENCABEZADO ============ */
+.cabecera{position:sticky;top:0;z-index:50;background:rgba(247,247,242,.94);border-bottom:1px solid var(--borde);backdrop-filter:blur(8px)}
+.cabecera__inner{display:flex;align-items:center;gap:.75rem;padding-block:.6rem;position:relative}
+.marca{display:flex;align-items:center;gap:.65rem;text-decoration:none;color:var(--tinta);min-height:44px}
+.marca__logo{width:42px;height:42px;flex:none}
+.marca__texto{display:flex;flex-direction:column;line-height:1.12}
+.marca__nombre{font-weight:800;font-size:1.04rem;letter-spacing:-.01em;color:var(--petroleo)}
+.marca__sub{font-size:.7rem;font-weight:600;color:var(--tinta-2);letter-spacing:.03em}
+.menu-boton{margin-left:auto;width:46px;height:46px;display:grid;place-items:center;background:#fff;border:1.5px solid var(--borde);border-radius:12px;cursor:pointer;color:var(--petroleo)}
+.menu-boton:hover{border-color:var(--teal)}
+.nav{display:none;position:absolute;top:calc(100% + .35rem);left:0;right:0;background:#fff;border:1px solid var(--borde);border-radius:var(--r2);box-shadow:var(--s2);padding:.4rem;animation:aparecer .22s ease;z-index:60}
+.nav--abierta{display:block}
+.nav__lista{list-style:none;display:flex;flex-direction:column}
+.nav__enlace{display:flex;align-items:center;justify-content:space-between;gap:.6rem;min-height:48px;padding:.55rem .8rem;border-radius:10px;font-weight:600;color:var(--tinta);text-decoration:none}
+.nav__enlace:hover{background:#EFF4EF;color:var(--teal-osc)}
+.nav__enlace[aria-current="page"]{color:var(--teal-osc);background:var(--teal-suave)}
+.nav__enlace .ico{width:16px;height:16px}
+@media (min-width:860px){
+  .menu-boton{display:none}
+  .nav{display:block;position:static;background:none;border:0;box-shadow:none;padding:0;margin-left:auto}
+  .nav__lista{flex-direction:row;gap:.2rem}
+  .nav__enlace{min-height:44px;padding:.45rem .85rem;font-size:.94rem}
+}
+/* ============ HERO ============ */
+.hero{position:relative;overflow:hidden;padding-block:2.4rem 2.8rem}
+.hero__grid{display:grid;gap:2.2rem;align-items:center}
+.hero__titulo{font-size:clamp(1.95rem,7vw,3.35rem);line-height:1.07;letter-spacing:-.022em;font-weight:800;color:var(--petroleo);margin:.7rem 0 1rem}
+.subrayado{font-style:normal;background:linear-gradient(transparent 64%,var(--ambar) 64%,var(--ambar) 94%,transparent 94%)}
+.hero__texto{font-size:1.06rem;color:#3C4B51;max-width:56ch}
+.hero__acciones{display:flex;flex-wrap:wrap;gap:.7rem;margin-top:1.5rem}
+.hero__sello{display:inline-flex;align-items:center;gap:.5rem;margin-top:1.3rem;padding:.45rem .9rem;border:1.5px dashed #C9D6CE;border-radius:999px;background:#fff;font-size:.78rem;font-weight:700;color:var(--tinta-2)}
+.hero__sello .ico{width:15px;height:15px;color:var(--teal)}
+.hero__arte{max-width:560px;margin-inline:auto;width:100%}
+@media (min-width:900px){
+  .hero{padding-block:3.6rem 4.2rem}
+  .hero__grid{grid-template-columns:1.02fr .98fr;gap:3rem}
+  .hero__arte{margin:0}
+}
+/* ============ BANDA OSCURA DE INDICADORES ============ */
+.banda{background:var(--petroleo);color:#fff;padding-block:2.3rem;position:relative;overflow:hidden}
+.banda__grid{display:grid;gap:1.6rem}
+.stat{display:flex;flex-direction:column;gap:.15rem}
+.stat__num{font-size:clamp(2rem,8vw,2.85rem);font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums;display:flex;align-items:flex-start;gap:.15rem}
+.stat__moneda{font-size:.48em;font-weight:800;margin-top:.35em;opacity:.85}
+.stat__etiqueta{color:#BFD8D0;font-weight:600;font-size:.92rem}
+.stat__detalle{font-size:.8rem;color:#8FB0A8}
+.banda__nota{margin-top:1.7rem;display:flex;gap:.55rem;align-items:flex-start;font-size:.8rem;color:#9FBDB6;max-width:70ch}
+.banda__nota .ico{width:16px;height:16px;margin-top:.1rem;color:var(--ambar)}
+@media (min-width:760px){
+  .banda{padding-block:2.8rem}
+  .banda__grid{grid-template-columns:repeat(3,1fr)}
+  .stat{border-left:1px solid rgba(255,255,255,.16);padding-left:1.5rem}
+  .stat:first-child{border-left:0;padding-left:0}
+}
+/* ============ SECCIONES ============ */
+.seccion{padding-block:2.7rem}
+.seccion--claro{background:#fff;border-block:1px solid var(--borde)}
+.seccion__cab{display:flex;align-items:flex-end;justify-content:space-between;gap:1rem;margin-bottom:1.5rem;flex-wrap:wrap}
+.boca{display:block;text-transform:uppercase;letter-spacing:.14em;font-size:.74rem;font-weight:800;color:var(--teal);margin-bottom:.35rem}
+.titulo-2{font-size:clamp(1.45rem,5vw,2.05rem);letter-spacing:-.016em;font-weight:800;color:var(--petroleo)}
+.seccion__intro{color:var(--tinta-2);max-width:64ch;margin-top:.5rem}
+.enlace-flecha{display:inline-flex;align-items:center;gap:.35rem;min-height:44px;font-weight:700;font-size:.95rem;color:var(--teal-osc);text-decoration:none;white-space:nowrap}
+.enlace-flecha:hover{text-decoration:underline}
+.enlace-flecha .ico{width:17px;height:17px}
+/* Pasos (cómo funciona) */
+.pasos-home{display:grid;gap:1rem;counter-reset:paso}
+.paso-home{position:relative;background:#fff;border:1px solid var(--borde);border-radius:var(--r2);box-shadow:var(--s1);padding:1.2rem 1.2rem 1.2rem 4.1rem}
+.paso-home__num{position:absolute;left:1.15rem;top:1.25rem;width:40px;height:40px;border-radius:14px;background:var(--teal-suave);color:var(--teal-osc);display:grid;place-items:center;font-weight:800;font-size:1.1rem}
+.paso-home__num::before{counter-increment:paso;content:counter(paso)}
+.paso-home h3{font-size:1.05rem;color:var(--petroleo);margin-bottom:.25rem;padding-right:1.6rem}
+.paso-home p{font-size:.92rem;color:var(--tinta-2)}
+.paso-home .ico-mini{position:absolute;right:1rem;top:1.25rem;color:#B9C9C0}
+@media (min-width:820px){.pasos-home{grid-template-columns:repeat(3,1fr)}}
+/* Transparencia */
+.transparencia{display:grid;gap:1.1rem}
+.transparencia__tarjeta{background:var(--petroleo);color:#E7F0ED;border-radius:var(--r3);padding:1.7rem 1.4rem;display:grid;gap:1rem;align-content:start;position:relative;overflow:hidden}
+.transparencia__tarjeta h3{color:#fff;font-size:1.3rem;letter-spacing:-.01em}
+.transparencia__tarjeta p{font-size:.95rem;color:#C4D9D2}
+.transparencia__icono{width:52px;height:52px;border-radius:16px;background:rgba(255,255,255,.1);display:grid;place-items:center;color:var(--ambar)}
+.transparencia__icono .ico{width:26px;height:26px}
+.transparencia__lista{list-style:none;display:grid;gap:.75rem}
+.transparencia__lista li{display:flex;gap:.6rem;align-items:flex-start;font-size:.93rem}
+.transparencia__lista .ico{width:18px;height:18px;margin-top:.15rem;color:var(--verde)}
+@media (min-width:820px){.transparencia{grid-template-columns:1.1fr 1fr;align-items:stretch}}
+.aviso{display:flex;gap:.7rem;align-items:flex-start;background:var(--ambar-suave);border:1px solid #EDD9AC;border-radius:14px;padding:.9rem 1rem;font-size:.87rem;color:var(--ambar-tinta)}
+.aviso .ico{color:#A9791F;margin-top:.1rem}
+.aviso strong{font-weight:800}
+/* ============ DEMO QR ============ */
+.qr-demo{display:grid;gap:1.4rem;background:#fff;border:1px solid var(--borde);border-radius:var(--r3);box-shadow:var(--s1);padding:1.4rem}
+.qr-demo__controles{display:grid;gap:.9rem;align-content:start}
+.qr-caja{justify-self:center;background:#fff;border:1px solid var(--borde);border-radius:var(--r2);padding:1rem 1rem .8rem;box-shadow:var(--s1);text-align:center;margin:0}
+.qr-caja svg{width:150px;height:150px}
+.qr-caja figcaption{font-size:.72rem;color:var(--tinta-2);margin-top:.6rem;max-width:180px;line-height:1.4}
+.orden,.campo-select{min-height:48px;border:1.5px solid var(--borde);border-radius:12px;background:#fff;font-weight:600;padding:.4rem .7rem;width:100%;cursor:pointer}
+.orden:focus,.campo-select:focus{border-color:var(--teal);outline:none;box-shadow:0 0 0 3px rgba(30,118,110,.14)}
+.qr-enlace{display:flex;gap:.6rem;align-items:center;justify-content:space-between;background:var(--marfil);border:1px solid var(--borde);border-radius:10px;padding:.55rem .5rem .55rem .75rem;font-size:.82rem;color:var(--tinta-2)}
+.qr-enlace code{font-family:ui-monospace,Consolas,monospace;font-size:.76rem;color:var(--petroleo);word-break:break-all}
+@media (min-width:760px){.qr-demo{grid-template-columns:1fr auto;align-items:center;padding:1.8rem}}
+/* ============ TARJETAS DE INSTITUCIÓN ============ */
+.grilla-inst{display:grid;gap:1.1rem;grid-template-columns:1fr}
+@media (min-width:640px){.grilla-inst{grid-template-columns:repeat(2,1fr)}}
+@media (min-width:1000px){.grilla-inst{grid-template-columns:repeat(3,1fr)}}
+.tarjeta{background:#fff;border:1px solid var(--borde);border-radius:var(--r2);overflow:hidden;box-shadow:var(--s1);display:flex;flex-direction:column;transition:transform .25s ease,box-shadow .25s ease;cursor:pointer}
+.tarjeta:hover{transform:translateY(-3px);box-shadow:var(--s2)}
+.tarjeta__arte{height:92px;position:relative;display:flex;align-items:center;justify-content:center;flex:none}
+.arte--puntos{background-image:radial-gradient(rgba(255,255,255,.3) 1.6px,transparent 1.7px);background-size:14px 14px}
+.arte--rayas{background-image:repeating-linear-gradient(45deg,rgba(255,255,255,.17) 0 2px,transparent 2px 11px)}
+.arte--ondas{background-image:repeating-radial-gradient(circle at 50% 130%,transparent 0 9px,rgba(255,255,255,.18) 9px 11px)}
+.insignia{width:58px;height:58px;border-radius:18px;background:#fff;display:grid;place-items:center;box-shadow:var(--s1)}
+.insignia .ico{width:30px;height:30px}
+.tarjeta__cuerpo{padding:1.05rem 1.15rem 1.15rem;display:flex;flex-direction:column;gap:.65rem;flex:1}
+.tarjeta__filas{display:flex;align-items:center;gap:.45rem;flex-wrap:wrap}
+.cat-chip{font-size:.7rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--teal-osc);background:var(--teal-suave);border-radius:999px;padding:.24rem .65rem}
+.cat-chip--logro{background:var(--ambar-suave);color:var(--ambar-tinta)}
+.tarjeta__nombre{font-size:1.12rem;font-weight:800;color:var(--petroleo);letter-spacing:-.01em}
+.tarjeta__nombre a{color:inherit;text-decoration:none}
+.tarjeta__nombre a:hover{text-decoration:underline;text-decoration-color:var(--verde);text-decoration-thickness:2px;text-underline-offset:3px}
+.tarjeta__desc{color:var(--tinta-2);font-size:.9rem}
+.objetivo-mini{display:flex;gap:.5rem;align-items:flex-start;background:var(--marfil);border:1px solid var(--borde);border-radius:12px;padding:.55rem .7rem;font-size:.84rem;font-weight:600;color:var(--tinta)}
+.objetivo-mini .ico{width:16px;height:16px;color:var(--teal);margin-top:.1rem}
+.progreso__cab{display:flex;justify-content:space-between;align-items:baseline;gap:.5rem;font-size:.85rem;margin-bottom:.35rem}
+.progreso__monto{font-weight:800;color:var(--petroleo);font-variant-numeric:tabular-nums}
+.progreso__rotulo{color:var(--tinta-2);font-size:.8rem}
+.progreso__pct{font-weight:800;color:var(--teal-osc);font-variant-numeric:tabular-nums}
+.progreso__pista{height:10px;background:var(--pista);border-radius:999px;overflow:hidden}
+.progreso__lleno{height:100%;width:0;border-radius:999px;background:var(--teal);transition:width 1s cubic-bezier(.22,.8,.28,1)}
+.progreso__lleno--meta{background:var(--verde)}
+.tarjeta__pie{display:flex;justify-content:space-between;align-items:center;gap:.75rem;margin-top:auto;padding-top:.4rem;flex-wrap:wrap}
+.tarjeta__resta{font-size:.82rem;color:var(--tinta-2)}
+.tarjeta__resta strong{color:var(--petroleo);font-variant-numeric:tabular-nums}
+/* ============ EXPLORADOR ============ */
+.filtros{display:grid;gap:.9rem;margin-bottom:1.4rem}
+.campo-busqueda{position:relative}
+.campo-busqueda > .ico{position:absolute;left:.9rem;top:50%;transform:translateY(-50%);color:var(--tinta-2);pointer-events:none}
+.campo-busqueda input{width:100%;min-height:50px;border:1.5px solid var(--borde);border-radius:12px;background:#fff;padding:.6rem 2.7rem;font-size:1rem}
+.campo-busqueda input:focus{border-color:var(--teal);outline:none;box-shadow:0 0 0 3px rgba(30,118,110,.14)}
+.campo-busqueda__limpiar{position:absolute;right:.35rem;top:50%;transform:translateY(-50%);width:38px;height:38px;display:grid;place-items:center;background:none;border:0;border-radius:9px;cursor:pointer;color:var(--tinta-2)}
+.campo-busqueda__limpiar:hover{background:#EFF3EE;color:var(--petroleo)}
+.chips{display:flex;flex-wrap:wrap;gap:.5rem}
+.filtros__fila{display:flex;gap:.8rem;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.contador-resultados{font-size:.88rem;color:var(--tinta-2)}
+.contador-resultados strong{color:var(--petroleo)}
+.contador-resultados{margin-left:auto}
+.estado-vacio{text-align:center;padding:3rem 1.2rem;border:1.5px dashed #C9D6CE;border-radius:var(--r2);background:#fff}
+.estado-vacio .ico{width:46px;height:46px;margin:0 auto .9rem;color:#A9BDB3}
+.estado-vacio h3{font-size:1.15rem;color:var(--petroleo);margin-bottom:.35rem}
+.estado-vacio p{color:var(--tinta-2);font-size:.94rem;margin-bottom:1.2rem}
+/* ============ DETALLE DE INSTITUCIÓN ============ */
+.migas{display:flex;align-items:center;gap:.4rem;padding-top:1.1rem;font-size:.86rem}
+.migas a{display:inline-flex;align-items:center;gap:.35rem;color:var(--tinta-2);text-decoration:none;font-weight:600;min-height:36px}
+.migas a:hover{color:var(--teal-osc)}
+.migas .ico{width:15px;height:15px}
+.detalle-cab{position:relative;color:#fff;overflow:hidden}
+.detalle-cab__fondo{position:absolute;inset:0;background:var(--arte-color,var(--petroleo))}
+.detalle-cab__fondo::after{content:"";position:absolute;inset:0;background:rgba(15,38,46,.32)}
+.detalle-cab__fondo.arte--puntos{background-image:radial-gradient(rgba(255,255,255,.22) 1.6px,transparent 1.7px);background-size:16px 16px}
+.detalle-cab__fondo.arte--rayas{background-image:repeating-linear-gradient(45deg,rgba(255,255,255,.12) 0 2px,transparent 2px 12px)}
+.detalle-cab__fondo.arte--ondas{background-image:repeating-radial-gradient(circle at 50% 140%,transparent 0 10px,rgba(255,255,255,.13) 10px 12px)}
+.detalle-cab__inner{position:relative;z-index:1;padding-block:1.5rem 1.6rem;display:grid;gap:.9rem;justify-items:start}
+.insignia-icono{width:64px;height:64px;border-radius:20px;background:#fff;display:grid;place-items:center;box-shadow:var(--s1)}
+.insignia-icono .ico{width:34px;height:34px}
+.detalle-cab h1{font-size:clamp(1.5rem,6vw,2.25rem);letter-spacing:-.018em;font-weight:800}
+.detalle-cab__meta{display:flex;flex-wrap:wrap;gap:.45rem .8rem;align-items:center;font-size:.87rem;color:rgba(255,255,255,.95)}
+.detalle-cab__meta .item{display:inline-flex;align-items:center;gap:.35rem}
+.detalle-cab__meta .ico{width:16px;height:16px}
+.chip-clara{background:rgba(255,255,255,.17);border:1px solid rgba(255,255,255,.32);border-radius:999px;padding:.22rem .7rem;font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em}
+.detalle-cab__desc{max-width:66ch;color:rgba(255,255,255,.95);font-size:.97rem}
+.detalle-cuerpo{display:grid;gap:1.2rem;padding-block:1.4rem 3.5rem}
+.detalle-col{display:grid;gap:1.2rem;min-width:0}
+.detalle-lateral{display:grid;gap:1.2rem;align-content:start}
+@media (min-width:960px){
+  .detalle-cuerpo{grid-template-columns:minmax(0,1.62fr) minmax(320px,1fr);align-items:start}
+  .detalle-lateral{position:sticky;top:88px}
+}
+.panel{background:#fff;border:1px solid var(--borde);border-radius:var(--r2);box-shadow:var(--s1);padding:1.25rem}
+.panel__titulo{font-size:1.18rem;font-weight:800;color:var(--petroleo);letter-spacing:-.01em;margin-bottom:.6rem;display:flex;align-items:center;gap:.55rem}
+.panel__titulo .ico{color:var(--teal);width:22px;height:22px}
+.panel__sub{font-size:.9rem;color:var(--tinta-2);margin-bottom:1rem}
+.cifras{display:grid;grid-template-columns:1fr 1fr;gap:.8rem}
+.cifra{background:var(--marfil);border:1px solid var(--borde);border-radius:14px;padding:.75rem .85rem}
+.cifra__rotulo{font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--tinta-2)}
+.cifra__valor{font-size:1.28rem;font-weight:800;color:var(--petroleo);font-variant-numeric:tabular-nums;letter-spacing:-.01em;margin-top:.1rem}
+.cifra--destacada{background:var(--teal-suave);border-color:#CFE5DC}
+.cifra--destacada .cifra__valor{color:var(--teal-osc);font-size:1.62rem}
+.narrativa{display:grid;gap:.85rem;margin-top:.9rem}
+.punto{display:flex;gap:.7rem;align-items:flex-start;font-size:.94rem;color:#3C4B51}
+.punto .ico{color:var(--teal);margin-top:.12rem;width:19px;height:19px}
+.punto strong{color:var(--petroleo)}
+/* Destino de fondos */
+.presu{display:grid;gap:1rem;margin-top:.9rem}
+.presu__cab{display:flex;justify-content:space-between;align-items:baseline;gap:.6rem;font-size:.93rem;margin-bottom:.3rem}
+.presu__concepto{font-weight:700;color:var(--petroleo)}
+.presu__pct{font-weight:800;color:var(--teal-osc);font-variant-numeric:tabular-nums;white-space:nowrap}
+.presu__pista{height:8px;background:var(--pista);border-radius:999px;overflow:hidden}
+.presu__lleno{height:100%;width:0;border-radius:999px;background:var(--ambar);transition:width 1s cubic-bezier(.22,.8,.28,1)}
+.presu__monto{font-size:.82rem;font-weight:700;color:var(--tinta-2);font-variant-numeric:tabular-nums;margin-top:.25rem}
+.presu__detalle{font-size:.84rem;color:var(--tinta-2);margin-top:.15rem}
+/* Actualizaciones */
+.linea-tiempo{list-style:none;display:grid;gap:1.15rem;margin-top:1rem;position:relative;padding-left:1.4rem}
+.linea-tiempo::before{content:"";position:absolute;left:5px;top:8px;bottom:8px;width:2px;background:var(--borde)}
+.evento{position:relative}
+.evento__punto{position:absolute;left:-1.4rem;top:.3rem;width:12px;height:12px;border-radius:50%;background:var(--verde);box-shadow:0 0 0 3px #DFF2E8}
+.evento__fecha{font-size:.74rem;font-weight:800;color:var(--tinta-2);text-transform:uppercase;letter-spacing:.06em}
+.evento h4{font-size:.99rem;color:var(--petroleo);margin:.15rem 0 .2rem}
+.evento p{font-size:.9rem;color:var(--tinta-2)}
+.badge-demo{display:inline-flex;align-items:center;gap:.3rem;font-size:.66rem;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--ambar-tinta);background:var(--ambar-suave);padding:.2rem .55rem;border-radius:999px;margin-left:.4rem;vertical-align:middle}
+/* Colaboradores */
+.colab-lista{display:grid;gap:.6rem;margin-top:.9rem}
+.colab{display:flex;gap:.7rem;align-items:flex-start;background:var(--marfil);border:1px solid var(--borde);border-radius:12px;padding:.6rem .75rem}
+.colab__avatar{width:36px;height:36px;border-radius:50%;background:#E0EEE7;color:var(--teal-osc);display:grid;place-items:center;font-weight:800;font-size:.85rem;flex:none}
+.colab__nombre{font-weight:700;font-size:.9rem;color:var(--petroleo)}
+.colab__monto{color:var(--teal-osc);font-weight:800;font-size:.86rem;font-variant-numeric:tabular-nums}
+.colab__msj{margin:.1rem 0 0;font-size:.85rem;color:var(--tinta-2)}
+.colab--sesion{border-style:dashed;border-color:#BFDCCE;background:#F2F9F5}
+/* Proyección y avisos flotantes */
+.proyeccion{border:1.5px dashed #9CC8B6;background:#EEF7F1;border-radius:14px;padding:.95rem 1rem;font-size:.88rem;color:#245B50;display:flex;gap:.65rem;align-items:flex-start}
+.proyeccion .ico{color:var(--teal);margin-top:.1rem}
+.proyeccion strong{font-variant-numeric:tabular-nums}
+/* CTA fija móvil */
+.cta-fija{position:fixed;left:0;right:0;bottom:0;z-index:45;background:#fff;border-top:1px solid var(--borde);box-shadow:0 -10px 30px -18px rgba(22,59,70,.35);padding:.7rem 1.1rem calc(.7rem + env(safe-area-inset-bottom));display:flex;gap:1rem;align-items:center;justify-content:space-between}
+.cta-fija__info{display:flex;flex-direction:column;line-height:1.3;font-size:.78rem;color:var(--tinta-2)}
+.cta-fija__info strong{font-size:1.05rem;color:var(--petroleo);font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+@media (min-width:960px){.cta-fija{display:none !important}}
+/* ============ FLUJO DE DONACIÓN ============ */
+.flujo{max-width:640px;margin-inline:auto}
+.flujo__cab{text-align:center;padding-top:1.2rem}
+.flujo__cab h1{font-size:clamp(1.4rem,5.5vw,2rem);color:var(--petroleo);letter-spacing:-.015em}
+.flujo__cab p{color:var(--tinta-2);font-size:.94rem;margin-top:.4rem}
+.pasos{display:flex;gap:.35rem;margin:1.5rem 0 1.6rem;list-style:none;counter-reset:n}
+.paso{flex:1;text-align:center;font-size:.72rem;font-weight:700;color:var(--tinta-2);position:relative;padding-top:2.15rem;letter-spacing:.01em}
+.paso::before{counter-increment:n;content:counter(n);position:absolute;top:0;left:50%;transform:translateX(-50%);width:30px;height:30px;border-radius:50%;background:#fff;border:2px solid var(--borde);display:grid;place-items:center;font-weight:800;font-size:.82rem;color:var(--tinta-2);transition:background .25s,border-color .25s,color .25s}
+.paso--activo{color:var(--petroleo)}
+.paso--activo::before{background:var(--teal);border-color:var(--teal);color:#fff}
+.paso--hecho::before{background:var(--verde);border-color:var(--verde);color:#0E2A22;content:"✓"}
+.paso--hecho{color:var(--tinta-2)}
+@media (min-width:640px){
+  .paso::after{content:"";position:absolute;top:14px;left:calc(50% + 20px);right:calc(-50% + 20px);height:2px;background:var(--borde)}
+  .paso:last-child::after{display:none}
+  .paso--hecho::after{background:var(--verde)}
+}
+.tarjeta-flujo{background:#fff;border:1px solid var(--borde);border-radius:var(--r2);box-shadow:var(--s1);padding:1.3rem 1.2rem}
+.tarjeta-flujo h2{font-size:1.2rem;color:var(--petroleo);margin-bottom:.35rem;letter-spacing:-.01em}
+.tarjeta-flujo > p{font-size:.9rem;color:var(--tinta-2);margin-bottom:1.1rem}
+.montos{display:grid;grid-template-columns:1fr 1fr;gap:.7rem}
+@media (min-width:520px){.montos{grid-template-columns:repeat(4,1fr)}}
+.monto-opt{min-height:58px;border:1.5px solid var(--borde);border-radius:14px;background:#fff;font-weight:800;font-size:1.02rem;color:var(--petroleo);cursor:pointer;font-variant-numeric:tabular-nums;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.05rem;transition:border-color .2s,background .2s,box-shadow .2s}
+.monto-opt small{font-size:.68rem;font-weight:600;color:var(--tinta-2)}
+.monto-opt:hover{border-color:#9CC8B6}
+.monto-opt[aria-pressed="true"]{border-color:var(--teal);background:#EAF4EE;box-shadow:0 0 0 3px rgba(30,118,110,.14);color:var(--teal-osc)}
+.monto-opt .ico{width:20px;height:20px;color:var(--tinta-2)}
+.monto-opt[aria-pressed="true"] .ico{color:var(--teal-osc)}
+.campo{display:grid;gap:.4rem;margin-top:1.1rem}
+.campo__etiqueta{font-weight:700;font-size:.9rem;color:var(--petroleo)}
+.campo__etiqueta .opcional{font-weight:600;font-size:.75rem;color:var(--tinta-2)}
+.campo__ayuda{font-size:.8rem;color:var(--tinta-2)}
+.campo input[type="text"],.campo input[type="number"],.campo textarea{min-height:50px;border:1.5px solid var(--borde);border-radius:12px;padding:.65rem .85rem;background:#fff;width:100%}
+.campo textarea{min-height:92px;resize:vertical}
+.campo input:focus,.campo textarea:focus{border-color:var(--teal);outline:none;box-shadow:0 0 0 3px rgba(30,118,110,.14)}
+.campo--error input{border-color:var(--error)}
+.campo--error input:focus{box-shadow:0 0 0 3px rgba(169,59,38,.14)}
+.error-texto{color:var(--error);font-size:.83rem;font-weight:600;display:flex;gap:.35rem;align-items:center}
+.error-texto .ico{width:15px;height:15px}
+.checkbox{display:flex;gap:.65rem;align-items:flex-start;padding:.8rem .85rem;border:1.5px solid var(--borde);border-radius:12px;background:#fff;cursor:pointer;font-size:.9rem;margin-top:1.1rem}
+.checkbox:hover{border-color:#9CC8B6}
+.checkbox input{width:20px;height:20px;accent-color:var(--teal);margin-top:.12rem;flex:none}
+.checkbox strong{color:var(--petroleo)}
+.flujo-nav{display:flex;gap:.7rem;margin-top:1.5rem;flex-wrap:wrap}
+.flujo-nav .boton{flex:1;min-width:140px}
+.flujo__volver{display:inline-flex;align-items:center;gap:.35rem;font-weight:700;font-size:.9rem;color:var(--tinta-2);text-decoration:none;min-height:44px}
+.flujo__volver:hover{color:var(--teal-osc)}
+.flujo__volver .ico{width:16px;height:16px}
+/* Revisión y comprobante */
+.resumen{display:grid;gap:0;margin:.9rem 0 .2rem;border:1px solid var(--borde);border-radius:14px;overflow:hidden}
+.resumen__fila{display:flex;justify-content:space-between;gap:1rem;padding:.65rem .85rem;border-bottom:1px solid var(--borde);font-size:.9rem;background:#fff}
+.resumen__fila:last-child{border-bottom:0}
+.resumen__fila dt{color:var(--tinta-2);font-weight:600;flex:none}
+.resumen__fila dd{margin:0;font-weight:700;text-align:right;color:var(--petroleo)}
+.resumen__fila dd span{display:block;font-weight:500;font-size:.8rem;color:var(--tinta-2)}
+.comprobante{background:#fff;border:1.5px solid var(--borde);border-radius:var(--r2);overflow:hidden;box-shadow:var(--s1);margin-top:1.3rem;text-align:left}
+.comprobante__cab{background:var(--petroleo);color:#fff;padding:.9rem 1.1rem;display:flex;align-items:center;gap:.6rem;font-weight:800;letter-spacing:-.01em}
+.comprobante__cab .ico{color:var(--ambar)}
+.comprobante__cuerpo{padding:1rem 1.1rem;display:grid;gap:.55rem}
+.comprobante__fila{display:flex;justify-content:space-between;gap:1rem;font-size:.88rem}
+.comprobante__fila span{color:var(--tinta-2)}
+.comprobante__fila strong{text-align:right;font-variant-numeric:tabular-nums;color:var(--petroleo)}
+.sello{display:inline-flex;align-items:center;gap:.45rem;background:var(--petroleo);color:var(--ambar);border:1.5px dashed rgba(242,192,120,.65);padding:.5rem .85rem;border-radius:10px;font-weight:800;letter-spacing:.06em;font-size:.76rem;text-transform:uppercase;margin:.4rem 1.1rem 0}
+.sello .ico{width:16px;height:16px}
+.comprobante__pie{margin-top:.9rem;padding:.7rem 1.1rem .85rem;background:var(--marfil);border-top:1px dashed var(--borde);font-size:.75rem;color:var(--tinta-2)}
+.exito-cab{text-align:center;padding-top:.8rem}
+.exito-anim{width:88px;height:88px;margin:0 auto 1rem}
+.exito-circulo{stroke-dasharray:302;stroke-dashoffset:302;animation:dibujar .7s ease forwards}
+.exito-check{stroke-dasharray:60;stroke-dashoffset:60;animation:dibujar .4s ease .6s forwards}
+.exito-cab h1{font-size:clamp(1.5rem,6vw,2.1rem);color:var(--petroleo);letter-spacing:-.015em}
+.exito-cab p{color:var(--tinta-2);margin-top:.5rem;max-width:44ch;margin-inline:auto}
+.exito-acciones{display:grid;gap:.7rem;margin-top:1.4rem}
+@media (min-width:520px){.exito-acciones{grid-template-columns:1fr 1fr}}
+/* ============ PREGUNTAS FRECUENTES ============ */
+.faq{display:grid;gap:.7rem;max-width:760px}
+.faq details{background:#fff;border:1px solid var(--borde);border-radius:14px;box-shadow:var(--s1)}
+.faq summary{cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;gap:1rem;min-height:58px;padding:.85rem 1.1rem;font-weight:700;color:var(--petroleo)}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary .ico{transition:transform .25s ease;color:var(--teal);flex:none}
+.faq details[open] summary .ico{transform:rotate(180deg)}
+.faq details > p{margin:0;padding:0 1.1rem 1.1rem;color:var(--tinta-2);font-size:.93rem}
+/* ============ PIE DE PÁGINA ============ */
+.pie{background:var(--petroleo);color:#CFE0DB;margin-top:3rem}
+.pie__grid{display:grid;gap:1.9rem;padding-block:2.5rem}
+@media (min-width:760px){.pie__grid{grid-template-columns:1.4fr .8fr 1.2fr}}
+.pie__marca{display:flex;gap:.65rem;align-items:center;color:#fff;font-weight:800;font-size:1.05rem;letter-spacing:-.01em}
+.pie__marca svg{width:36px;height:36px;flex:none}
+.pie__tag{margin-top:.8rem;font-size:.9rem;color:#A9C4BD;max-width:38ch}
+.pie__titulo{color:#fff;font-size:.95rem;margin-bottom:.7rem;letter-spacing:.01em}
+.pie__lista{list-style:none;display:grid;gap:.35rem}
+.pie__lista a{color:#CFE0DB;text-decoration:none;display:inline-flex;align-items:center;min-height:40px;font-size:.93rem}
+.pie__lista a:hover{color:#fff;text-decoration:underline;text-underline-offset:3px}
+.pie__aviso-txt{font-size:.86rem;color:#A9C4BD}
+.pie__aviso-txt strong{color:#fff}
+.pie__separador{border-top:1px solid rgba(255,255,255,.14);padding-block:1.2rem}
+.pie__demo{display:flex;gap:.6rem;align-items:flex-start;font-size:.82rem;color:#BFD6CF}
+.pie__demo .ico{width:16px;height:16px;margin-top:.1rem;color:var(--ambar)}
+.pie__legal{display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;font-size:.75rem;color:#8FB0A8;padding-bottom:1.5rem}
+/* ============ TOAST ============ */
+#toast-zona{position:fixed;bottom:1.1rem;left:50%;transform:translateX(-50%);z-index:90;display:grid;gap:.5rem;width:min(92vw,430px);pointer-events:none}
+.toast{background:var(--petroleo);color:#fff;padding:.8rem 1rem;border-radius:12px;box-shadow:var(--s2);display:flex;gap:.6rem;align-items:center;font-size:.9rem;font-weight:600;animation:aparecer .25s ease}
+.toast .ico{color:var(--verde);width:18px;height:18px}
+</style>
+</head>
+<body>
+<a class="salto" href="#contenido">Saltar al contenido principal</a>
+<div class="cinta-demo" id="cinta-demo" role="note" aria-label="Aviso de demostración">
+  <div class="cinta-demo__inner">
+    <svg class="ico" aria-hidden="true" focusable="false"><use href="#ic-info"></use></svg>
+    <span><strong>Prototipo conceptual.</strong>&nbsp;Demostración con datos ficticios: no se procesan pagos ni se reciben donaciones.</span>
+  </div>
+  <button class="cinta-demo__cerrar" type="button" aria-label="Ocultar aviso de demostración" data-accion="cerrar-cinta">
+    <svg class="ico" aria-hidden="true" focusable="false"><use href="#ic-x"></use></svg>
+  </button>
+</div>
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">
+  <symbol id="ic-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></symbol>
+  <symbol id="ic-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+  <symbol id="ic-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M15.9 15.9L21 21"/></symbol>
+  <symbol id="ic-flecha-d" viewBox="0 0 24 24"><path d="M4.5 12h15M13.5 6l6 6-6 6"/></symbol>
+  <symbol id="ic-flecha-i" viewBox="0 0 24 24"><path d="M19.5 12h-15M10.5 18l-6-6 6-6"/></symbol>
+  <symbol id="ic-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11.2V16M12 7.6h.01"/></symbol>
+  <symbol id="ic-check" viewBox="0 0 24 24"><path d="M4.5 12.5l5 5 10-11"/></symbol>
+  <symbol id="ic-qr" viewBox="0 0 24 24"><rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><path d="M14 14h2.5M19 14h1M14 18.5h2.5M19.5 19h.01M14 21h.01"/></symbol>
+  <symbol id="ic-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></symbol>
+  <symbol id="ic-escuela" viewBox="0 0 24 24"><path d="M3.5 21h17M5.5 21V10.5L12 5.8l6.5 4.7V21"/><path d="M12 5.8V3.2h3.4l-1.1 1.3 1.1 1.3H12"/><path d="M10 21v-4.2h4V21"/><path d="M9 12h.01M12 12h.01M15 12h.01"/></symbol>
+  <symbol id="ic-salud" viewBox="0 0 24 24"><path d="M12 20.3C7.2 16.5 3.8 13.4 3.8 9.8 3.8 7.2 5.7 5.3 8 5.3c1.5 0 2.9.8 4 2.1 1.1-1.3 2.5-2.1 4-2.1 2.3 0 4.2 1.9 4.2 4.5 0 3.6-3.4 6.7-8.2 10.5z"/><path d="M7 11.5h2.5l1.3-2 2 3.8 1.4-1.8H17"/></symbol>
+  <symbol id="ic-deportes" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.6l4.2 3-1.6 4.9H9.4L7.8 10.6z"/><path d="M12 3.5v4.1M4.1 10.3l3.7.3M19.9 10.3l-3.7.3M7.3 18.9l2-3.4M16.7 18.9l-2-3.4"/></symbol>
+  <symbol id="ic-libro" viewBox="0 0 24 24"><path d="M12 6.6C10.5 5.1 8.5 4.6 6 4.6c-1 0-2 .1-3 .4v13.7c1-.3 2-.4 3-.4 2.5 0 4.5.6 6 2.1 1.5-1.5 3.5-2.1 6-2.1 1 0 2 .1 3 .4V5c-1-.3-2-.4-3-.4-2.5 0-4.5.5-6 2z"/><path d="M12 6.6v13.8"/></symbol>
+  <symbol id="ic-cultura" viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 .2 18c1.2 0 2.1-.8 2.1-1.9 0-.6-.3-1-.6-1.4-.3-.4-.6-.8-.6-1.4 0-1 .9-1.8 2-1.8h1.9a4 4 0 0 0 4-4C21 6.5 16.9 3 12 3z"/><path d="M7.4 10.6h.01M10.4 7.1h.01M15 7.6h.01M6.7 14.6h.01"/></symbol>
+  <symbol id="ic-comunidad" viewBox="0 0 24 24"><circle cx="8.5" cy="8.2" r="3"/><path d="M2.8 19.2c.6-3 2.9-4.9 5.7-4.9s5.1 1.9 5.7 4.9"/><circle cx="16.6" cy="9.2" r="2.3"/><path d="M15.9 14.5c2.4.4 4.3 2 4.9 4.5"/></symbol>
+  <symbol id="ic-musica" viewBox="0 0 24 24"><path d="M9 18V5.4L19 3.5V16"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="16.5" cy="16" r="2.5"/></symbol>
+  <symbol id="ic-jardin" viewBox="0 0 24 24"><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/><rect x="8.5" y="4" width="7" height="7" rx="1.5"/><path d="M12 6.2h.01M7.5 15.2h.01M16.5 15.2h.01"/></symbol>
+  <symbol id="ic-juegos" viewBox="0 0 24 24"><path d="M4 5v14M20 5v14M4 5h16"/><path d="M9.2 5l1.4 9M14.8 5l-1.4 9"/><path d="M9.4 14h5.2"/><path d="M9.4 14a2.6 2.6 0 0 1-2.6 2.6M14.6 14a2.6 2.6 0 0 0 2.6 2.6"/></symbol>
+  <symbol id="ic-bandera" viewBox="0 0 24 24"><path d="M5.5 21V4"/><path d="M5.5 4.5c4-2 7 2 11 0v8.2c-4 2-7-2-11 0z"/></symbol>
+  <symbol id="ic-pin" viewBox="0 0 24 24"><path d="M12 21c-4-3.8-6.5-7-6.5-10.3A6.5 6.5 0 0 1 12 4a6.5 6.5 0 0 1 6.5 6.7C18.5 14 16 17.2 12 21z"/><circle cx="12" cy="10.6" r="2.3"/></symbol>
+  <symbol id="ic-calendario" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15.5" rx="2"/><path d="M3.5 9.5h17M8 3v4M16 3v4"/></symbol>
+  <symbol id="ic-corazon" viewBox="0 0 24 24"><path d="M12 20.3C7.2 16.5 3.8 13.4 3.8 9.8 3.8 7.2 5.7 5.3 8 5.3c1.5 0 2.9.8 4 2.1 1.1-1.3 2.5-2.1 4-2.1 2.3 0 4.2 1.9 4.2 4.5 0 3.6-3.4 6.7-8.2 10.5z"/></symbol>
+  <symbol id="ic-escudo" viewBox="0 0 24 24"><path d="M12 3l7 2.8v5.4c0 4.6-3 8.2-7 9.8-4-1.6-7-5.2-7-9.8V5.8z"/><path d="M9 11.6l2.2 2.2 4.3-4.4"/></symbol>
+  <symbol id="ic-peso" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 6.8v10.4M14.7 9c-.5-.8-1.5-1.3-2.7-1.3-1.6 0-2.8.9-2.8 2.2 0 2.9 5.6 1.4 5.6 4.2 0 1.3-1.2 2.2-2.8 2.2-1.3 0-2.3-.5-2.8-1.4"/></symbol>
+  <symbol id="ic-doc" viewBox="0 0 24 24"><path d="M6.5 3.5h7L18 8v12.5H6.5z"/><path d="M13.5 3.5V8H18M9.5 13h5M9.5 16.5h5"/></symbol>
+  <symbol id="ic-objetivo" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1"/></symbol>
+  <symbol id="ic-chispa" viewBox="0 0 24 24"><path d="M12 3l1.9 5.4L19.5 10l-5.6 1.6L12 17l-1.9-5.4L4.5 10l5.6-1.6z"/></symbol>
+  <symbol id="ic-home" viewBox="0 0 24 24"><path d="M4 11.2L12 4l8 7.2"/><path d="M6 9.8V20h12V9.8"/><path d="M10 20v-5.6h4V20"/></symbol>
+  <symbol id="ic-chevron" viewBox="0 0 24 24"><path d="M6 9.5l6 6 6-6"/></symbol>
+  <symbol id="ic-usuarios" viewBox="0 0 24 24"><circle cx="9" cy="8.5" r="3.2"/><path d="M3.2 19.5c.6-3.2 3-5.2 5.8-5.2s5.2 2 5.8 5.2"/><path d="M15.5 5.7a3.2 3.2 0 0 1 0 5.6M17.7 14.6c1.7.8 2.8 2.4 3.1 4.4"/></symbol>
+  <symbol id="ic-alerta" viewBox="0 0 24 24"><path d="M12 4L2.8 20h18.4z"/><path d="M12 10v4.2M12 17.2h.01"/></symbol>
+</svg>
+<header class="cabecera">
+  <div class="contenedor cabecera__inner">
+    <a class="marca" href="#/inicio" aria-label="Impulso Ciudadano — ir al inicio">
+      <svg class="marca__logo" viewBox="0 0 48 48" role="img" aria-label="Logotipo de Impulso Ciudadano">
+        <rect x="1.5" y="1.5" width="45" height="45" rx="13" fill="#163B46"/>
+        <path d="M13.5 33.5v-7" stroke="#70C6A7" stroke-width="4.6" stroke-linecap="round"/>
+        <path d="M24 33.5V19.5" stroke="#70C6A7" stroke-width="4.6" stroke-linecap="round"/>
+        <path d="M34.5 33.5v-19" stroke="#F2C078" stroke-width="4.6" stroke-linecap="round"/>
+        <circle cx="34.5" cy="8.6" r="2.4" fill="#F2C078"/>
+      </svg>
+      <span class="marca__texto">
+        <span class="marca__nombre">Impulso Ciudadano</span>
+        <span class="marca__sub">Municipalidad de Las Toscas</span>
+      </span>
+    </a>
+    <button class="menu-boton" type="button" aria-expanded="false" aria-controls="nav-principal" aria-label="Abrir menú de navegación" data-accion="menu">
+      <svg class="ico" aria-hidden="true" focusable="false"><use href="#ic-menu"></use></svg>
+    </button>
+    <nav class="nav" id="nav-principal" aria-label="Navegación principal">
+      <ul class="nav__lista">
+        <li><a class="nav__enlace" href="#/inicio" data-ruta-nav="inicio">Inicio</a></li>
+        <li><a class="nav__enlace" href="#/instituciones" data-ruta-nav="instituciones">Instituciones</a></li>
+        <li><a class="nav__enlace" href="#/como-funciona" data-ruta-nav="como">Cómo funciona</a></li>
+        <li><a class="nav__enlace" href="#/preguntas" data-ruta-nav="preguntas">Preguntas frecuentes</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+<main id="contenido" tabindex="-1"></main>
+<footer class="pie sobre-oscuro">
+  <div class="contenedor">
+    <div class="pie__grid">
+      <div>
+        <div class="pie__marca">
+          <svg viewBox="0 0 48 48" role="img" aria-label="Logotipo de Impulso Ciudadano">
+            <rect x="1.5" y="1.5" width="45" height="45" rx="13" fill="#1E5460"/>
+            <path d="M13.5 33.5v-7" stroke="#70C6A7" stroke-width="4.6" stroke-linecap="round"/>
+            <path d="M24 33.5V19.5" stroke="#70C6A7" stroke-width="4.6" stroke-linecap="round"/>
+            <path d="M34.5 33.5v-19" stroke="#F2C078" stroke-width="4.6" stroke-linecap="round"/>
+            <circle cx="34.5" cy="8.6" r="2.4" fill="#F2C078"/>
+          </svg>
+          Impulso Ciudadano
+        </div>
+        <p class="pie__tag">Pequeñas contribuciones, grandes cambios. Una iniciativa conceptual para conectar a vecinas y vecinos con las instituciones públicas de su ciudad.</p>
+      </div>
+      <nav aria-label="Enlaces del pie de página">
+        <h3 class="pie__titulo">Navegación</h3>
+        <ul class="pie__lista">
+          <li><a href="#/inicio">Inicio</a></li>
+          <li><a href="#/instituciones">Instituciones</a></li>
+          <li><a href="#/como-funciona">Cómo funciona</a></li>
+          <li><a href="#/preguntas">Preguntas frecuentes</a></li>
+        </ul>
+      </nav>
+      <div>
+        <h3 class="pie__titulo">Sobre esta presentación</h3>
+        <p class="pie__aviso-txt"><strong>Prototipo conceptual.</strong> Las instituciones, campañas y cifras mostradas son ficticias. No se procesan pagos ni se reciben donaciones.</p>
+      </div>
+    </div>
+    <div class="pie__separador">
+      <p class="pie__demo">
+        <svg class="ico" aria-hidden="true" focusable="false"><use href="#ic-info"></use></svg>
+        <span>Este sitio es una demostración de una idea para la Municipalidad de Las Toscas (Santa Fe). Funciona sin conexión, no envía datos a ningún servidor y toda la información se genera localmente. Una futura implementación municipal podría incorporar seguimiento de campañas y rendiciones públicas.</span>
+      </p>
+    </div>
+    <div class="pie__legal">
+      <span>© 2026 · Presentación conceptual — Municipalidad de Las Toscas</span>
+      <span>Datos de demostración · Sin servicios externos</span>
+    </div>
+  </div>
+</footer>
+<div id="toast-zona" aria-live="polite"></div>
+<script>
+'use strict';
+/* =====================================================================
+   IMPULSO CIUDADANO — Prototipo conceptual
+   Plataforma municipal de donaciones (demostración sin pagos reales).
+   Todo el contenido es ficticio y funciona sin conexión a servicios externos.
+   ===================================================================== */
+
+/* ============ CONFIGURACIÓN CENTRAL ============ */
+const APP = {
+  nombre: 'Impulso Ciudadano',
+  lema: 'Pequeñas contribuciones, grandes cambios',
+  municipio: 'Municipalidad de Las Toscas',
+  provincia: 'Santa Fe · Argentina',
+  montosSugeridos: [2000, 5000, 10000, 20000],
+  limiteImporte: 5000000
+};
+
+const CATEGORIAS = [
+  { id: 'educacion', nombre: 'Educación' },
+  { id: 'salud', nombre: 'Salud' },
+  { id: 'deportes', nombre: 'Deportes' },
+  { id: 'cultura', nombre: 'Cultura' },
+  { id: 'comunidad', nombre: 'Comunidad' }
+];
+
+/* ============ DATOS FICTICIOS (INSTITUCIONES) ============ */
+const INSTITUCIONES = [
+  {
+    id: 'escuela-101',
+    nombre: 'Escuela Primaria N.º 6001',
+    categoria: 'educacion',
+    descripcion: 'Escuela pública de gestión estatal que acompaña a diario a más de 300 estudiantes del barrio centro.',
+    icono: 'escuela',
+    color: '#1E766E',
+    patron: 'puntos',
+    ubicacion: 'Barrio Centro · Las Toscas',
+    destacada: true,
+    estado: 'activa',
+    campana: {
+      titulo: 'Renovemos los ventiladores de nuestras aulas',
+      problema: 'Los ventiladores de las aulas tienen más de veinte años de uso. Varios ya no funcionan, los que quedan hacen mucho ruido y consumen energía de más, y en los días de calor las clases se vuelven muy difíciles.',
+      porque: 'Un aula bien ventilada mejora la concentración, la asistencia y el bienestar de las y los estudiantes que aprenden allí todas las mañanas.',
+      alcance: 'Con la meta se comprarán e instalarán 12 ventiladores de techo nuevos, con garantía y colocación incluida, para las aulas de 1.º a 7.º grado.'
+    },
+    meta: 1200000,
+    recaudado: 735000,
+    presupuesto: [
+      { concepto: 'Compra de ventiladores', porcentaje: 62, detalle: '12 equipos nuevos de techo, con garantía oficial.' },
+      { concepto: 'Instalación eléctrica', porcentaje: 23, detalle: 'Verificación del cableado y colocación a cargo de personal matriculado.' },
+      { concepto: 'Materiales y fijaciones', porcentaje: 15, detalle: 'Soportes, anclajes y elementos de seguridad para las aulas.' }
+    ],
+    actualizaciones: [
+      { fecha: '30 de septiembre de 2026', titulo: 'La campaña sigue creciendo', texto: 'Gracias a los aportes de vecinas y vecinos, la campaña superó el 60 % de la meta.' },
+      { fecha: '9 de septiembre de 2026', titulo: 'Se actualizó el detalle de materiales', texto: 'Se incorporó al plan la verificación del cableado de las aulas del patio antes de colocar los equipos nuevos.' },
+      { fecha: '22 de agosto de 2026', titulo: 'Se solicitaron presupuestos', texto: 'La institución contactó a tres proveedores locales para comparar precios y garantías del equipamiento.' }
+    ],
+    colaboradores: [
+      { nombre: 'Marta L.', monto: 10000, mensaje: '¡Que pronto haga fresquito en las aulas!' },
+      { nombre: 'Diego R.', monto: 5000, mensaje: 'Yo fui a esa escuela. ¡Adelante!' },
+      { nombre: 'Anónimo', monto: 20000, mensaje: '' }
+    ]
+  },
+  {
+    id: 'salud-201',
+    nombre: 'Centro de Salud Municipal',
+    categoria: 'salud',
+    descripcion: 'Centro de atención primaria que brinda consultas, controles pediátricos y vacunación al barrio norte.',
+    icono: 'salud',
+    color: '#2F6690',
+    patron: 'ondas',
+    ubicacion: 'Barrio Norte · Las Toscas',
+    destacada: true,
+    estado: 'activa',
+    campana: {
+      titulo: 'Equipamiento básico para atender mejor a nuestro barrio',
+      problema: 'El centro atiende a cientos de familias por semana con equipamiento antiguo: tensiómetros que fallan, una balanza pediátrica descalibrada y nebulizadores que se comparten entre salas.',
+      porque: 'Contar con equipos confiables permite controles más rápidos y precisos, y evita derivaciones innecesarias hacia el hospital de la ciudad.',
+      alcance: 'Con la meta se incorporarán tensiómetros, balanzas pediátricas, nebulizadores y un oxímetro de pulso para los consultorios y la sala de vacunación.'
+    },
+    meta: 2000000,
+    recaudado: 1180000,
+    presupuesto: [
+      { concepto: 'Equipamiento médico', porcentaje: 70, detalle: 'Tensiómetros, balanzas pediátricas, nebulizadores y oxímetro de pulso.' },
+      { concepto: 'Insumos y repuestos', porcentaje: 18, detalle: 'Manguitas de repuesto, filtros y accesorios de recambio.' },
+      { concepto: 'Puesta en marcha', porcentaje: 12, detalle: 'Calibración de equipos y capacitación del equipo de salud.' }
+    ],
+    actualizaciones: [
+      { fecha: '2 de octubre de 2026', titulo: 'La campaña continúa recibiendo aportes', texto: 'La comunidad ya cubrió más de la mitad de la meta gracias a las colaboraciones de vecinos.' },
+      { fecha: '14 de septiembre de 2026', titulo: 'Se definió el listado definitivo', texto: 'El equipo del centro priorizó los equipos según la demanda de consultas de cada sala.' },
+      { fecha: '28 de agosto de 2026', titulo: 'Se solicitaron presupuestos', texto: 'Se pidieron cotizaciones formales a proveedores de equipamiento médico de la región.' }
+    ],
+    colaboradores: [
+      { nombre: 'Vecinos del barrio norte', monto: 50000, mensaje: 'Colecta del festival barrial.' },
+      { nombre: 'Lucía F.', monto: 10000, mensaje: 'Por los chicos del centro de salud.' },
+      { nombre: 'Anónimo', monto: 25000, mensaje: 'Gracias al personal por la dedicación.' }
+    ]
+  },
+  {
+    id: 'club-201',
+    nombre: 'Club Social y Deportivo',
+    categoria: 'deportes',
+    descripcion: 'Club de barrio con disciplinas para todas las edades: fútbol, vóley, patín y hockey.',
+    icono: 'deportes',
+    color: '#5B7F3B',
+    patron: 'rayas',
+    ubicacion: 'Barrio Oeste · Las Toscas',
+    destacada: false,
+    estado: 'activa',
+    campana: {
+      titulo: 'Recuperemos las canchas del club del barrio',
+      problema: 'Los vestuarios tienen filtraciones y el alambrado perimetral está cedido en varios tramos. Sin reparaciones, varias categorías no pueden entrenar con normalidad los fines de semana.',
+      porque: 'El club es mucho más que deporte: es el espacio de encuentro de cientos de familias del barrio oeste, con actividades para niños, jóvenes y adultos mayores.',
+      alcance: 'Con la meta se repararán los vestuarios, se renovarán 200 metros de alambrado olímpico y se nivelará la cancha auxiliar.'
+    },
+    meta: 850000,
+    recaudado: 510000,
+    presupuesto: [
+      { concepto: 'Reparación de vestuarios', porcentaje: 45, detalle: 'Impermeabilización, cañerías y baños usables para los equipos.' },
+      { concepto: 'Alambrado perimetral', porcentaje: 35, detalle: '200 metros de alambrado olímpico nuevo con postes.' },
+      { concepto: 'Nivelación de cancha', porcentaje: 20, detalle: 'Relleno, nivelación y marcado de la cancha auxiliar.' }
+    ],
+    actualizaciones: [
+      { fecha: '26 de septiembre de 2026', titulo: 'La campaña continúa recibiendo aportes', texto: 'Lo recaudado en el torneo de amigos del club se sumó como aporte a la campaña.' },
+      { fecha: '5 de septiembre de 2026', titulo: 'Se actualizó el detalle de materiales', texto: 'Se cotizaron los postes y mallas para el alambrado perimetral con proveedores de la zona.' },
+      { fecha: '18 de agosto de 2026', titulo: 'Se solicitó el diagnóstico técnico', texto: 'Un albañil del barrio relevó el estado de los vestuarios y estimó los trabajos necesarios.' }
+    ],
+    colaboradores: [
+      { nombre: 'Sergio M.', monto: 15000, mensaje: 'Arriba el club, toda la vida.' },
+      { nombre: 'Familias de hockey', monto: 30000, mensaje: 'Aporte de la rifa del club.' },
+      { nombre: 'Anónimo', monto: 8000, mensaje: '' }
+    ]
+  },
+  {
+    id: 'biblioteca-301',
+    nombre: 'Biblioteca Popular',
+    categoria: 'cultura',
+    descripcion: 'Biblioteca popular con sala de lectura, préstamo a domicilio y talleres de apoyo escolar.',
+    icono: 'libro',
+    color: '#8A5A44',
+    patron: 'puntos',
+    ubicacion: 'Centro Cívico · Las Toscas',
+    destacada: true,
+    estado: 'activa',
+    campana: {
+      titulo: 'Nuevos libros y un rincón de lectura para todos',
+      problema: 'El catálogo lleva años sin renovarse y la sala de lectura necesita sillones y luminarias para poder usarse cómodamente por la tarde, cuando más familias la visitan.',
+      porque: 'Leer cerca de casa abre oportunidades: la biblioteca acompaña el apoyo escolar de decenas de niñas y niños cada semana y presta libros gratis todo el año.',
+      alcance: 'Con la meta se incorporarán 400 libros nuevos, seis juegos de mesa educativos y se renovará la iluminación y el mobiliario de la sala de lectura.'
+    },
+    meta: 600000,
+    recaudado: 420000,
+    presupuesto: [
+      { concepto: 'Libros y material educativo', porcentaje: 55, detalle: '400 libros nuevos, encuadernados y catalogados.' },
+      { concepto: 'Mobiliario de la sala', porcentaje: 30, detalle: 'Seis sillones de lectura y dos mesas de estudio.' },
+      { concepto: 'Iluminación', porcentaje: 15, detalle: 'Luminarias led de bajo consumo para la sala.' }
+    ],
+    actualizaciones: [
+      { fecha: '8 de octubre de 2026', titulo: 'La campaña se acerca a la meta', texto: 'Con los últimos aportes la campaña superó el 70 %: falta cada vez menos para el rincón de lectura.' },
+      { fecha: '20 de septiembre de 2026', titulo: 'Se definió la lista de títulos', texto: 'Las bibliotecarias armaron la lista de libros nuevos con sugerencias de lectoras y lectores.' },
+      { fecha: '30 de agosto de 2026', titulo: 'Se solicitaron presupuestos', texto: 'Se consultaron precios con librerías de la ciudad y editoriales con descuento institucional.' }
+    ],
+    colaboradores: [
+      { nombre: 'Rosa del Carmen P.', monto: 20000, mensaje: 'Por más libros para los chicos.' },
+      { nombre: 'Club de lectura "Las Toscas lee"', monto: 45000, mensaje: 'Aporte de la feria del libro barrial.' },
+      { nombre: 'Anónimo', monto: 10000, mensaje: 'La leí toda mi vida. ¡A seguir!' }
+    ]
+  },
+  {
+    id: 'cultura-401',
+    nombre: 'Centro Cultural Comunitario',
+    categoria: 'cultura',
+    descripcion: 'Espacio donde funcionan talleres de teatro, música, danza y manualidades del barrio sur.',
+    icono: 'cultura',
+    color: '#B0713B',
+    patron: 'ondas',
+    ubicacion: 'Barrio Sur · Las Toscas',
+    destacada: false,
+    estado: 'activa',
+    campana: {
+      titulo: 'Mejor luz y equipos para seguir creando en comunidad',
+      problema: 'La sala principal tiene una instalación lumínica vieja que se corta con frecuencia y el equipo de sonido de los talleres dejó de funcionar, lo que complica las clases y las muestras.',
+      porque: 'Los talleres culturales reúnen a más de 150 personas por semana; muchos jóvenes encuentran allí un espacio de contención y expresión.',
+      alcance: 'Con la meta se renovará la iluminación led de la sala, se comprará un equipo de sonido completo y se pondrán en valor los bancos y banquetas del salón.'
+    },
+    meta: 950000,
+    recaudado: 285000,
+    presupuesto: [
+      { concepto: 'Equipamiento de sonido', porcentaje: 45, detalle: 'Parlantes, consola y micrófonos para talleres y muestras.' },
+      { concepto: 'Iluminación led', porcentaje: 40, detalle: 'Renovación completa de la instalación lumínica de la sala.' },
+      { concepto: 'Puesta en valor del salón', porcentaje: 15, detalle: 'Reparación de bancos, banquetas y pintura general.' }
+    ],
+    actualizaciones: [
+      { fecha: '1 de octubre de 2026', titulo: 'La campaña continúa recibiendo aportes', texto: 'La campaña arrancó hace pocas semanas y ya recaudó casi un tercio de la meta.' },
+      { fecha: '12 de septiembre de 2026', titulo: 'Se actualizó el detalle de materiales', texto: 'Un electricista matriculado relevó la instalación y estimó los materiales para el recambio led.' },
+      { fecha: '25 de agosto de 2026', titulo: 'Se lanzó la campaña', texto: 'La comisión del centro definió junto al taller de teatro el objetivo prioritario de esta campaña.' }
+    ],
+    colaboradores: [
+      { nombre: 'Grupo de teatro del barrio', monto: 35000, mensaje: 'Lo juntado en la función benéfica.' },
+      { nombre: 'Camila T.', monto: 5000, mensaje: 'Por los talleres, son lo más.' },
+      { nombre: 'Anónimo', monto: 12000, mensaje: '' }
+    ]
+  },
+  {
+    id: 'comunidad-501',
+    nombre: 'Espacio Deportivo Barrial',
+    categoria: 'comunidad',
+    descripcion: 'Plaza deportiva municipal con canchas abiertas, juegos infantiles y sector de picnic.',
+    icono: 'juegos',
+    color: '#4E6E97',
+    patron: 'rayas',
+    ubicacion: 'Barrio Las Delicias · Las Toscas',
+    destacada: true,
+    estado: 'activa',
+    campana: {
+      titulo: 'Juegos seguros para las infancias del barrio',
+      problema: 'Varios juegos del sector infantil están rotos o fuera de servicio por desgaste, y el piso de arena necesita recambio para amortiguar bien las caídas.',
+      porque: 'Es el único espacio recreativo a menos de diez cuadras y lo usan a diario familias de todo el barrio, sobre todo en las tardes y los fines de semana.',
+      alcance: 'Con la meta se repararán los juegos existentes, se incorporarán dos módulos nuevos y se recambiará el piso de arena de seguridad.'
+    },
+    meta: 1500000,
+    recaudado: 1350000,
+    presupuesto: [
+      { concepto: 'Reparación de juegos', porcentaje: 40, detalle: 'Hamacas, toboganes y sube y baja con pintura antioxidante.' },
+      { concepto: 'Nuevos módulos de juego', porcentaje: 40, detalle: 'Dos módulos combinados para distintas edades.' },
+      { concepto: 'Piso de arena y señalética', porcentaje: 20, detalle: 'Recambio de arena certificada y cartelería de uso cuidado.' }
+    ],
+    actualizaciones: [
+      { fecha: '10 de octubre de 2026', titulo: 'Falta muy poco para la meta', texto: 'La campaña superó el 90 %: con los próximos aportes se podría llegar a los juegos nuevos.' },
+      { fecha: '21 de septiembre de 2026', titulo: 'Se solicitaron presupuestos', texto: 'La municipalidad pidió cotizaciones para los dos módulos nuevos de juego.' },
+      { fecha: '1 de septiembre de 2026', titulo: 'Se lanzó la campaña', texto: 'Vecinos del barrio ayudaron a relevar qué juegos se pueden reparar y cuáles hace falta reemplazar.' }
+    ],
+    colaboradores: [
+      { nombre: 'Comisión vecinal Las Delicias', monto: 120000, mensaje: 'Aporte de la parrillada del barrio.' },
+      { nombre: 'Valeria S.', monto: 15000, mensaje: 'Mis chicos juegan ahí todos los días.' },
+      { nombre: 'Anónimo', monto: 40000, mensaje: '¡Ya casi está!' }
+    ]
+  },
+  {
+    id: 'musica-402',
+    nombre: 'Escuela Municipal de Música',
+    categoria: 'cultura',
+    descripcion: 'Escuela pública de música con orquesta infantil, coro y clases de instrumentos.',
+    icono: 'musica',
+    color: '#6B5B95',
+    patron: 'puntos',
+    ubicacion: 'Casa de la Cultura · Las Toscas',
+    destacada: false,
+    estado: 'superada',
+    campana: {
+      titulo: 'Instrumentos para que la orquesta siga sonando',
+      problema: 'Casi un tercio de los instrumentos de la orquesta infantil no se puede usar: violines sin cuerdas, un teclado que ya no enciende y percusión que necesita reparación urgente.',
+      porque: 'La orquesta reúne a más de 40 chicas y chicos; cuando faltan instrumentos, algunos quedan afuera de la actividad y de la presentación de fin de año.',
+      alcance: 'Con la meta se repararían los instrumentos dañados y se comprarían dos violines, un violonchelo y un teclado nuevo para las clases.'
+    },
+    meta: 500000,
+    recaudado: 520000,
+    presupuesto: [
+      { concepto: 'Compra de instrumentos', porcentaje: 50, detalle: 'Dos violines, un violonchelo y un teclado nuevo.' },
+      { concepto: 'Reparación de instrumentos', porcentaje: 40, detalle: 'Trabajo de luthier para la percusión y los violines de la orquesta.' },
+      { concepto: 'Accesorios y estuches', porcentaje: 10, detalle: 'Cuerdas, resinas y estuches para proteger los instrumentos.' }
+    ],
+    actualizaciones: [
+      { fecha: '5 de octubre de 2026', titulo: '¡Meta alcanzada!', texto: 'Gracias a un aporte de la cooperadora y a las colaboraciones de la comunidad, la campaña cubrió el 100 % de su meta.' },
+      { fecha: '17 de septiembre de 2026', titulo: 'Se definieron los modelos', texto: 'Los profes de la orquesta eligieron los modelos de violines y teclado según la edad de las y los alumnos.' },
+      { fecha: '2 de septiembre de 2026', titulo: 'Se solicitaron presupuestos', texto: 'Se consultó a luthiers y casas de música de Santa Fe por instrumentos con garantía.' }
+    ],
+    colaboradores: [
+      { nombre: 'Cooperadora de la escuela', monto: 150000, mensaje: 'Aporte anual de la cooperadora.' },
+      { nombre: 'Padres de la orquesta', monto: 60000, mensaje: 'Lo juntado en el bono contribución.' },
+      { nombre: 'Anónimo', monto: 30000, mensaje: 'Que suene la orquesta.' }
+    ]
+  },
+  {
+    id: 'jardin-102',
+    nombre: 'Jardín de Infantes Municipal',
+    categoria: 'educacion',
+    descripcion: 'Jardín de infantes público que recibe a 120 niñas y niños de 3 a 5 años.',
+    icono: 'jardin',
+    color: '#C98A2C',
+    patron: 'ondas',
+    ubicacion: 'Barrio San José · Las Toscas',
+    destacada: false,
+    estado: 'activa',
+    campana: {
+      titulo: 'Un patio más seguro para los más chicos',
+      problema: 'El patio de juegos tiene bordes de cemento fisurado y la sombra del único árbol no alcanza para todos los sectores durante los meses de calor.',
+      porque: 'Las y los más chicos pasan gran parte de la jornada al aire libre: un patio seguro, con piso blando y sombra, es parte de su aprendizaje y su salud.',
+      alcance: 'Con la meta se colocará césped sintético en la zona de juegos, se instalarán dos veladores y se repararán los bordes del arenero.'
+    },
+    meta: 780000,
+    recaudado: 312000,
+    presupuesto: [
+      { concepto: 'Césped sintético', porcentaje: 50, detalle: 'Piso blando certificado para la zona de juegos.' },
+      { concepto: 'Sombra y veladores', porcentaje: 35, detalle: 'Dos veladores con tela antisolar para el patio.' },
+      { concepto: 'Reparación del arenero', porcentaje: 15, detalle: 'Bordes redondeados y arena nueva certificada.' }
+    ],
+    actualizaciones: [
+      { fecha: '4 de octubre de 2026', titulo: 'La campaña continúa recibiendo aportes', texto: 'Las familias del jardín empezaron a difundir la campaña entre vecinos y comercios del barrio.' },
+      { fecha: '16 de septiembre de 2026', titulo: 'Se actualizó el detalle de materiales', texto: 'Se cotizaron dos tipos de césped sintético y se eligió el de mayor amortiguación.' },
+      { fecha: '29 de agosto de 2026', titulo: 'Se lanzó la campaña', texto: 'La dirección del jardín definió junto a las maestras las prioridades de mejora del patio.' }
+    ],
+    colaboradores: [
+      { nombre: 'Familias del salón amarillo', monto: 22000, mensaje: 'Recaudación del festival de tortas.' },
+      { nombre: 'Anónimo', monto: 30000, mensaje: 'Por los más chiquitos.' },
+      { nombre: 'Sofía G.', monto: 7000, mensaje: '¡Ánimos, que mi hija ama ese patio!' }
+    ]
+  }
+];
+/* ============ HELPERS ============ */
+const $ = (sel, ctx) => (ctx || document).querySelector(sel);
+const $$ = (sel, ctx) => Array.from((ctx || document).querySelectorAll(sel));
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const fmtARS = n => new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(n);
+const fmtNum = n => new Intl.NumberFormat('es-AR', { maximumFractionDigits: 0 }).format(n);
+const fmtPct = n => new Intl.NumberFormat('es-AR', { maximumFractionDigits: 2 }).format(n) + ' %';
+const reduceMov = () => window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const ico = (nombre, extra) => '<svg class="ico' + (extra ? ' ' + extra : '') + '" aria-hidden="true" focusable="false"><use href="#ic-' + nombre + '"></use></svg>';
+const nombreCategoria = id => { const c = CATEGORIAS.find(x => x.id === id); return c ? c.nombre : id; };
+
+/* ============ CÁLCULOS DERIVADOS (nunca escritos a mano) ============ */
+const porInstancia = id => INSTITUCIONES.find(i => i.id === id) || null;
+const progresoDe = i => Math.round((i.recaudado / i.meta) * 10000) / 100;
+const restanteDe = i => Math.max(0, i.meta - i.recaudado);
+const metaCumplida = i => i.recaudado >= i.meta;
+const montoPresupuesto = (i, item) => Math.round(i.meta * item.porcentaje / 100);
+const totalesPlataforma = () => ({
+  recaudado: INSTITUCIONES.reduce((a, i) => a + i.recaudado, 0),
+  instituciones: INSTITUCIONES.length,
+  alcanzadas: INSTITUCIONES.filter(metaCumplida).length
+});
+
+/* ============ ESTADO DE LA SESIÓN (solo en memoria) ============ */
+const sesion = {
+  colaboradores: [],   // simulaciones de esta sesión, por institución
+  proyeccion: {},      // suma simulada por id, para la proyección hipotética
+  cintaCerrada: false
+};
+const estadoExplorador = { q: '', cat: 'todas', orden: 'relevancia' };
+
+/* ============ QR ILUSTRATIVO (decorativo, no codifica una URL) ============ */
+function qrIlustrativo(semilla) {
+  const N = 21, T = 8;
+  let s = 0;
+  for (let k = 0; k < semilla.length; k++) { s = (s * 31 + semilla.charCodeAt(k)) >>> 0; }
+  const azar = () => { s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296; };
+  let celdas = '';
+  const esFinder = (x, y) => (x < 7 && y < 7) || (x >= N - 7 && y < 7) || (x < 7 && y >= N - 7);
+  for (let y = 0; y < N; y++) {
+    for (let x = 0; x < N; x++) {
+      if (esFinder(x, y)) continue;
+      if (azar() < 0.44) celdas += '<rect x="' + (x * T) + '" y="' + (y * T) + '" width="' + T + '" height="' + T + '"/>';
+    }
+  }
+  const finder = (ox, oy) =>
+    '<rect x="' + ox + '" y="' + oy + '" width="' + (7 * T) + '" height="' + (7 * T) + '" fill="none" stroke="#202D32" stroke-width="' + T + '"/>' +
+    '<rect x="' + (ox + 2 * T) + '" y="' + (oy + 2 * T) + '" width="' + (3 * T) + '" height="' + (3 * T) + '" fill="#202D32"/>';
+  return '<svg viewBox="0 0 ' + (N * T) + ' ' + (N * T) + '" role="img" aria-label="Código QR ilustrativo y decorativo (no funcional)" fill="#202D32">' +
+    '<rect width="' + (N * T) + '" height="' + (N * T) + '" fill="#FFFFFF"/>' + celdas +
+    finder(0, 0) + finder((N - 7) * T, 0) + finder(0, (N - 7) * T) + '</svg>';
+}
+
+/* ============ NÚMERO DE OPERACIÓN LOCAL (solo demostración) ============ */
+function generarNumeroOperacion() {
+  const f = new Date();
+  const ymd = f.getFullYear() + String(f.getMonth() + 1).padStart(2, '0') + String(f.getDate()).padStart(2, '0');
+  const rnd = Math.random().toString(36).slice(2, 8).toUpperCase();
+  return 'DEMO-' + ymd + '-' + rnd;
+}
+
+/* ============ TOAST ============ */
+function toast(mensaje, icono) {
+  const zona = $('#toast-zona');
+  if (!zona) return;
+  const el = document.createElement('div');
+  el.className = 'toast';
+  el.innerHTML = ico(icono || 'check') + '<span>' + esc(mensaje) + '</span>';
+  zona.appendChild(el);
+  setTimeout(() => { el.remove(); }, 2600);
+}
+
+/* ============ COPIAR ENLACE (sin servicios externos) ============ */
+function copiarTexto(texto) {
+  const avisar = ok => toast(ok ? 'Enlace copiado: ' + texto : 'No se pudo copiar automáticamente. Tomá nota del enlace.', ok ? 'check' : 'info');
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(texto).then(() => avisar(true)).catch(() => avisar(copiarFallback(texto)));
+  } else {
+    avisar(copiarFallback(texto));
+  }
+}
+function copiarFallback(texto) {
+  try {
+    const ta = document.createElement('textarea');
+    ta.value = texto; ta.setAttribute('readonly', ''); ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select();
+    const ok = document.execCommand('copy');
+    ta.remove(); return ok;
+  } catch (e) { return false; }
+}
+
+/* ============ COMPONENTES VISUALES ============ */
+function chipLogro(i) {
+  if (metaCumplida(i)) return '<span class="cat-chip cat-chip--logro">' + ico('check') + ' Meta alcanzada</span>';
+  return '';
+}
+
+function barraProgreso(i, conCabecera) {
+  const pct = progresoDe(i);
+  const pctVisual = Math.min(100, pct);
+  const claseMeta = metaCumplida(i) ? ' progreso__lleno--meta' : '';
+  let cab = '';
+  if (conCabecera) {
+    cab = '<div class="progreso__cab">' +
+      '<span class="progreso__monto">' + fmtARS(i.recaudado) + '</span>' +
+      '<span class="progreso__pct">' + fmtPct(pct) + '</span></div>';
+  }
+  return cab +
+    '<div class="progreso__pista" role="progressbar" aria-valuenow="' + pct + '" aria-valuemin="0" aria-valuemax="100" aria-valuetext="' + fmtPct(pct) + '" aria-label="Avance de la campaña">' +
+    '<div class="progreso__lleno' + claseMeta + '" data-ancho="' + pctVisual + '%"></div></div>';
+}
+
+function arteTarjeta(i, conInsignia) {
+  return '<div class="tarjeta__arte arte--' + i.patron + '" style="background-color:' + i.color + '">' +
+    (conInsignia ? '<div class="insignia" style="color:' + i.color + '">' + ico(i.icono, 'ico--grande') + '</div>' : '') +
+    '</div>';
+}
+
+function tarjetaInstitucion(i) {
+  const alcanzada = metaCumplida(i);
+  return '<article class="tarjeta" data-accion="abrir-inst" data-id="' + esc(i.id) + '" aria-label="' + esc(i.nombre) + '">' +
+    arteTarjeta(i, true) +
+    '<div class="tarjeta__cuerpo">' +
+      '<div class="tarjeta__filas">' +
+        '<span class="cat-chip">' + esc(nombreCategoria(i.categoria)) + '</span>' +
+        chipLogro(i) +
+      '</div>' +
+      '<h3 class="tarjeta__nombre"><a href="#/institucion/' + esc(i.id) + '">' + esc(i.nombre) + '</a></h3>' +
+      '<p class="tarjeta__desc">' + esc(i.descripcion) + '</p>' +
+      '<p class="objetivo-mini">' + ico('bandera') + '<span>' + esc(i.campana.titulo) + '</span></p>' +
+      '<div>' + barraProgreso(i, true) + '</div>' +
+      '<div class="tarjeta__pie">' +
+        (alcanzada
+          ? '<span class="tarjeta__resta"><strong>Meta cumplida</strong> · ' + fmtARS(i.recaudado) + '</span>'
+          : '<span class="tarjeta__resta">Faltan <strong>' + fmtARS(restanteDe(i)) + '</strong></span>') +
+        '<a class="boton boton--primario boton--compacto" href="#/institucion/' + esc(i.id) + '">Ver proyecto' + ico('flecha-d') + '</a>' +
+      '</div>' +
+    '</div>' +
+  '</article>';
+}
+
+function avisoDemo(texto) {
+  return '<div class="aviso" role="note">' + ico('info') + '<span>' + texto + '</span></div>';
+}
+
+function colaboradoresHtml(i) {
+  const propios = sesion.colaboradores.filter(c => c.id === i.id);
+  const base = i.colaboradores.map(c =>
+    '<div class="colab">' +
+      '<span class="colab__avatar" aria-hidden="true">' + esc((c.nombre || 'A').trim().charAt(0).toUpperCase()) + '</span>' +
+      '<div><div class="colab__nombre">' + esc(c.nombre) + ' · <span class="colab__monto">' + fmtARS(c.monto) + '</span></div>' +
+      (c.mensaje ? '<p class="colab__msj">' + esc(c.mensaje) + '</p>' : '') + '</div>' +
+    '</div>');
+  const propiosHtml = propios.map(c =>
+    '<div class="colab colab--sesion">' +
+      '<span class="colab__avatar" aria-hidden="true">' + esc((c.nombre || 'A').trim().charAt(0).toUpperCase()) + '</span>' +
+      '<div><div class="colab__nombre">' + esc(c.nombre || 'Anónimo') + ' · <span class="colab__monto">' + fmtARS(c.monto) + '</span> <span class="badge-demo">tu simulación</span></div>' +
+      (c.mensaje ? '<p class="colab__msj">' + esc(c.mensaje) + '</p>' : '') + '</div>' +
+    '</div>');
+  if (!base.length && !propiosHtml.length) return '<p class="panel__sub">Todavía no hay colaboradores de ejemplo para esta campaña.</p>';
+  return '<div class="colab-lista">' + base.join('') + propiosHtml.join('') + '</div>' +
+    '<p class="panel__sub" style="margin:.8rem 0 0">Listado ficticio con fines ilustrativos. Los aportes de esta sesión aparecen solo en tu navegador.</p>';
+}
+
+/* ============ ILUSTRACIÓN DEL HERO (SVG propio) ============ */
+function ilustracionHero() {
+  return '<svg class="hero__arte" viewBox="0 0 560 400" role="img" aria-label="Ilustración de edificios públicos, árboles y vecinos de una ciudad que colabora">' +
+    '<ellipse cx="280" cy="352" rx="268" ry="20" fill="#E7EEE4"/>' +
+    '<rect x="20" y="344" width="520" height="4" rx="2" fill="#D8E2D6"/>' +
+    '<circle cx="474" cy="64" r="26" fill="#F2C078"/>' +
+    '<g stroke="#F2C078" stroke-width="4" stroke-linecap="round"><path d="M474 22v-8M474 114v-8M516 64h8M424 64h8M504 34l6-6M438 100l-6-6M504 94l6 6M438 28l-6 6"/></g>' +
+    '<path d="M52 204h136l-68-46z" fill="#163B46"/>' +
+    '<rect x="62" y="204" width="116" height="140" fill="#1E766E"/>' +
+    '<rect x="76" y="218" width="20" height="16" rx="2" fill="#F7F7F2" opacity=".92"/><rect x="144" y="218" width="20" height="16" rx="2" fill="#F7F7F2" opacity=".92"/>' +
+    '<rect x="76" y="250" width="20" height="16" rx="2" fill="#F7F7F2" opacity=".92"/><rect x="144" y="250" width="20" height="16" rx="2" fill="#F7F7F2" opacity=".92"/>' +
+    '<rect x="106" y="288" width="28" height="56" rx="2" fill="#F7F7F2"/>' +
+    '<rect x="112" y="150" width="3" height="26" fill="#163B46"/><path d="M115 150h22v12h-22z" fill="#F2C078"/>' +
+    '<rect x="204" y="150" width="128" height="194" rx="4" fill="#163B46"/>' +
+    '<path d="M204 150h128l-64-30z" fill="#0F2C35"/>' +
+    '<circle cx="268" cy="176" r="15" fill="#F7F7F2"/><path d="M268 168v8l6 4" stroke="#163B46" stroke-width="3" stroke-linecap="round" fill="none"/>' +
+    '<g fill="#BFD8D0"><rect x="220" y="206" width="24" height="18" rx="2"/><rect x="256" y="206" width="24" height="18" rx="2"/><rect x="292" y="206" width="24" height="18" rx="2"/><rect x="220" y="240" width="24" height="18" rx="2"/><rect x="292" y="240" width="24" height="18" rx="2"/></g>' +
+    '<rect x="252" y="286" width="32" height="58" rx="3" fill="#70C6A7"/>' +
+    '<rect x="344" y="234" width="122" height="110" rx="4" fill="#8A5A44"/>' +
+    '<rect x="344" y="222" width="122" height="14" rx="3" fill="#6E4634"/>' +
+    '<g fill="#F7F7F2" opacity=".92"><rect x="358" y="252" width="18" height="24" rx="2"/><rect x="396" y="252" width="18" height="24" rx="2"/><rect x="434" y="252" width="18" height="24" rx="2"/></g>' +
+    '<rect x="386" y="296" width="38" height="48" rx="2" fill="#F2C078"/>' +
+    '<g><rect x="192" y="300" width="8" height="44" rx="3" fill="#8A6A4C"/><circle cx="196" cy="288" r="24" fill="#70C6A7"/><circle cx="182" cy="296" r="14" fill="#5FB894"/><circle cx="212" cy="296" r="14" fill="#5FB894"/></g>' +
+    '<g><rect x="500" y="292" width="8" height="52" rx="3" fill="#8A6A4C"/><circle cx="504" cy="278" r="27" fill="#70C6A7"/><circle cx="489" cy="288" r="15" fill="#5FB894"/><circle cx="520" cy="288" r="15" fill="#5FB894"/></g>' +
+    '<g><circle cx="262" cy="302" r="9" fill="#F2C078"/><path d="M250 344v-20a12 12 0 0 1 24 0v20z" fill="#1E766E"/></g>' +
+    '<g><circle cx="300" cy="310" r="8" fill="#E8B27D"/><path d="M289 344v-16a11 11 0 0 1 22 0v16z" fill="#163B46"/></g>' +
+    '<g><circle cx="228" cy="312" r="7.5" fill="#F2C078"/><path d="M218 344v-15a10 10 0 0 1 20 0v15z" fill="#5B7F3B"/></g>' +
+    '<g class="flotar"><circle cx="430" cy="140" r="12" fill="#F2C078" stroke="#B0713B" stroke-width="2.5"/><path d="M430 133v14M434.6 137c-1-1.6-2.9-2.4-4.9-2.4-2.9 0-5 1.5-5 3.6 0 4.8 9.8 2.4 9.8 7.2 0 2.1-2.1 3.6-5 3.6-2.3 0-4.1-.9-4.9-2.3" stroke="#B0713B" stroke-width="2" fill="none" stroke-linecap="round"/></g>' +
+    '<g class="flotar" style="animation-delay:1.4s"><path d="M84 128c-6.4-5-10.8-8.4-10.8-13.2 0-3.6 2.8-6.2 6.2-6.2 1.8 0 3.5.9 4.6 2.4a5.9 5.9 0 0 1 4.6-2.4c3.4 0 6.2 2.6 6.2 6.2 0 4.8-4.4 8.2-10.8 13.2z" fill="#70C6A7"/></g>' +
+    '<g class="flotar" style="animation-delay:2.2s"><path d="M330 92l3.4 9.6L343 105l-9.6 3.4L330 118l-3.4-9.6L317 105l9.6-2.4z" fill="#F2C078"/></g>' +
+  '</svg>';
+}
+
+/* ============ VISTA: INICIO ============ */
+function vistaInicio() {
+  const t = totalesPlataforma();
+  const destacadas = INSTITUCIONES.filter(i => i.destacada).slice(0, 3);
+
+  const hero =
+  '<section class="hero" aria-labelledby="titulo-hero"><div class="contenedor">' +
+    '<div class="hero__grid">' +
+      '<div class="hero__contenido">' +
+        '<span class="boca">' + esc(APP.municipio) + ' · Iniciativa conceptual</span>' +
+        '<h1 class="hero__titulo" id="titulo-hero" data-foco tabindex="-1">Una ciudad que crece cuando <em class="subrayado">nos ayudamos</em>.</h1>' +
+        '<p class="hero__texto">Cada institución tiene un sueño por cumplir. Con tu aporte, podemos convertir esas metas en mejoras reales para nuestra comunidad.</p>' +
+        '<div class="hero__acciones">' +
+          '<a class="boton boton--primario" href="#/instituciones">' + ico('usuarios') + 'Conocer las instituciones</a>' +
+          '<a class="boton boton--contorno" href="#/como-funciona">' + ico('qr') + 'Cómo funciona</a>' +
+        '</div>' +
+        '<p class="hero__sello">' + ico('escudo') + 'Prototipo de demostración · Sin pagos reales</p>' +
+      '</div>' +
+      ilustracionHero() +
+    '</div>' +
+  '</div></section>';
+
+  const banda =
+  '<section class="banda sobre-oscuro" aria-labelledby="titulo-impacto"><div class="contenedor">' +
+    '<h2 class="sr-solo" id="titulo-impacto">Indicadores de impacto</h2>' +
+    '<div class="banda__grid">' +
+      '<div class="stat"><span class="stat__num"><span class="stat__moneda">$</span>' + fmtNum(t.recaudado) + '</span><span class="stat__etiqueta">recaudados por la comunidad</span><span class="stat__detalle">suma ficticia de las campañas demo</span></div>' +
+      '<div class="stat"><span class="stat__num">' + fmtNum(t.instituciones) + '</span><span class="stat__etiqueta">instituciones participantes</span><span class="stat__detalle">escuelas, salud, deporte, cultura y comunidad</span></div>' +
+      '<div class="stat"><span class="stat__num">' + fmtNum(t.alcanzadas) + '</span><span class="stat__etiqueta">metas alcanzadas</span><span class="stat__detalle">campañas que llegaron al 100 % de su meta</span></div>' +
+    '</div>' +
+    '<p class="banda__nota">' + ico('info') + '<span>Datos de demostración calculados a partir de las campañas ficticias de este prototipo. No corresponden a recaudaciones reales.</span></p>' +
+  '</div></section>';
+
+  const seccionDestacadas =
+  '<section class="seccion" aria-labelledby="titulo-destacadas"><div class="contenedor">' +
+    '<div class="seccion__cab">' +
+      '<div><span class="boca">Instituciones destacadas</span>' +
+      '<h2 class="titulo-2" id="titulo-destacadas" data-foco tabindex="-1">Proyectos que esperan tu impulso</h2></div>' +
+      '<a class="enlace-flecha" href="#/instituciones">Ver todas las instituciones ' + ico('flecha-d') + '</a>' +
+    '</div>' +
+    '<div class="grilla-inst">' + destacadas.map(tarjetaInstitucion).join('') + '</div>' +
+  '</div></section>';
+
+  const comoFunciona =
+  '<section class="seccion seccion--claro" id="como-funciona" aria-labelledby="titulo-como"><div class="contenedor">' +
+    '<div class="seccion__cab"><div>' +
+      '<span class="boca">Cómo funciona</span>' +
+      '<h2 class="titulo-2" id="titulo-como" data-foco tabindex="-1">Tres pasos para colaborar con tu ciudad</h2>' +
+    '</div></div>' +
+    '<ol class="pasos-home">' +
+      '<li class="paso-home"><span class="paso-home__num" aria-hidden="true"></span>' + ico('qr', 'ico-mini ico--grande') + '<h3>Escaneá el QR de una institución</h3><p>Cada institución cuenta con un código QR en su entrada. Al escanearlo desde tu celular, llegás directo a su campaña.</p></li>' +
+      '<li class="paso-home"><span class="paso-home__num" aria-hidden="true"></span>' + ico('objetivo', 'ico-mini ico--grande') + '<h3>Conocé su objetivo y elegí cuánto aportar</h3><p>Leé para qué se necesita el dinero, mirá el avance de la meta y elegí el importe que quieras simular.</p></li>' +
+      '<li class="paso-home"><span class="paso-home__num" aria-hidden="true"></span>' + ico('corazon', 'ico-mini ico--grande') + '<h3>Sumate a una mejora concreta de tu ciudad</h3><p>Tu colaboración simulada muestra cómo, entre todos, las pequeñas contribuciones se convierten en grandes cambios.</p></li>' +
+    '</ol>' +
+  '</div></section>';
+
+  const transparencia =
+  '<section class="seccion" aria-labelledby="titulo-transparencia"><div class="contenedor">' +
+    '<div class="seccion__cab"><div>' +
+      '<span class="boca">Transparencia</span>' +
+      '<h2 class="titulo-2" id="titulo-transparencia" data-foco tabindex="-1">Sabé siempre a qué va a parar cada aporte</h2>' +
+    '</div></div>' +
+    '<div class="transparencia">' +
+      '<div class="transparencia__tarjeta sobre-oscuro">' +
+        '<div class="transparencia__icono">' + ico('escudo') + '</div>' +
+        '<h3>El destino de los fondos, a la vista</h3>' +
+        '<p>Cada campaña muestra su meta, lo recaudado (ficticio) y el destino previsto de los fondos: en qué se invertirá, con qué porcentajes y qué se necesita para lograrlo. Así, quien escanea el QR entiende en segundos a qué va a parar su aporte.</p>' +
+        '<ul class="transparencia__lista">' +
+          '<li>' + ico('check') + '<span>Objetivo concreto y presupuesto planificado por rubro.</span></li>' +
+          '<li>' + ico('check') + '<span>Publicaciones con el avance de cada proyecto.</span></li>' +
+          '<li>' + ico('check') + '<span>Cifras claras: meta, recaudado, faltante y porcentaje.</span></li>' +
+        '</ul>' +
+      '</div>' +
+      '<div style="display:grid;gap:1.1rem;align-content:start">' +
+        '<p style="color:var(--tinta-2)">En una futura implementación municipal, las campañas podrían incorporar seguimiento del avance, publicaciones periódicas de cada institución y rendiciones públicas de lo ejecutado, con la información validada por el municipio.</p>' +
+        avisoDemo('<strong>Importante:</strong> en este prototipo no existen mecanismos reales de auditoría, cobros ni rendición de cuentas. Toda la información es un ejemplo de cómo podría funcionar la plataforma.') +
+      '</div>' +
+    '</div>' +
+  '</div></section>';
+
+  const qrDemo =
+  '<section class="seccion seccion--claro" id="demo-qr" aria-labelledby="titulo-qr"><div class="contenedor">' +
+    '<div class="seccion__cab"><div>' +
+      '<span class="boca">Acceso por QR</span>' +
+      '<h2 class="titulo-2" id="titulo-qr" data-foco tabindex="-1">Probá el acceso como si escanearas el QR</h2>' +
+      '<p class="seccion__intro">En la versión real, cada institución tendría su código QR pegado en la entrada. Elegí una institución y abrí su campaña como si llegaras desde su cartel.</p>' +
+    '</div></div>' +
+    '<div class="qr-demo">' +
+      '<div class="qr-demo__controles">' +
+        '<label class="campo__etiqueta" for="qr-selector">Institución a simular</label>' +
+        '<select class="campo-select" id="qr-selector">' +
+          INSTITUCIONES.map(i => '<option value="' + esc(i.id) + '">' + esc(i.nombre) + '</option>').join('') +
+        '</select>' +
+        '<div style="display:flex;gap:.6rem;flex-wrap:wrap">' +
+          '<button class="boton boton--primario" type="button" data-accion="qr-simular">' + ico('qr') + 'Simular escaneo</button>' +
+          '<a class="boton boton--contorno" id="qr-enlace-real" href="index.html?institucion=escuela-101">Abrir con el enlace</a>' +
+        '</div>' +
+        '<div class="qr-enlace"><code id="qr-ruta">index.html?institucion=escuela-101</code>' +
+          '<button class="boton boton--fantasma boton--compacto" type="button" data-accion="qr-copiar" aria-label="Copiar el enlace de la institución seleccionada">' + ico('copy') + 'Copiar</button></div>' +
+      '</div>' +
+      '<figure class="qr-caja"><span id="qr-lienzo">' + qrIlustrativo(INSTITUCIONES[0].id) + '</span>' +
+      '<figcaption>Código QR <strong>ilustrativo</strong>: es decorativo y no contiene una URL real. El acceso simulado se hace con los botones.</figcaption></figure>' +
+    '</div>' +
+  '</div></section>';
+
+  return '<div class="vista">' + hero + banda + seccionDestacadas + comoFunciona + transparencia + qrDemo + '</div>';
+}
+
+/* ============ VISTA: EXPLORADOR ============ */
+function vistaExplorador() {
+  return '<div class="vista"><section class="seccion" aria-labelledby="titulo-explorar"><div class="contenedor">' +
+    '<div class="seccion__cab"><div>' +
+      '<span class="boca">Explorador</span>' +
+      '<h1 class="titulo-2" id="titulo-explorar" data-foco tabindex="-1">Instituciones participantes</h1>' +
+      '<p class="seccion__intro">Conocé las campañas de las instituciones públicas y comunitarias de la ciudad. Buscá por nombre, filtrá por categoría y ordená según lo que más te importe.</p>' +
+    '</div></div>' +
+    '<div class="filtros">' +
+      '<div class="campo-busqueda">' +
+        ico('search') +
+        '<label class="sr-solo" for="buscador">Buscar institución por nombre o campaña</label>' +
+        '<input type="search" id="buscador" placeholder="Buscar por nombre o campaña…" autocomplete="off" value="' + esc(estadoExplorador.q) + '">' +
+        '<button class="campo-busqueda__limpiar' + (estadoExplorador.q ? '' : ' sr-solo') + '" type="button" data-accion="limpiar-busqueda" aria-label="Limpiar búsqueda">' + ico('x') + '</button>' +
+      '</div>' +
+      '<div class="chips" role="group" aria-label="Filtrar por categoría">' +
+        '<button class="chip" type="button" data-accion="filtro-cat" data-cat="todas" aria-pressed="' + (estadoExplorador.cat === 'todas') + '">Todas</button>' +
+        CATEGORIAS.map(c => '<button class="chip" type="button" data-accion="filtro-cat" data-cat="' + c.id + '" aria-pressed="' + (estadoExplorador.cat === c.id) + '">' + esc(c.nombre) + '</button>').join('') +
+      '</div>' +
+      '<div class="filtros__fila">' +
+        '<label class="sr-solo" for="orden">Ordenar resultados</label>' +
+        '<select class="orden" id="orden">' +
+          '<option value="relevancia"' + (estadoExplorador.orden === 'relevancia' ? ' selected' : '') + '>Orden: relevancia</option>' +
+          '<option value="progreso"' + (estadoExplorador.orden === 'progreso' ? ' selected' : '') + '>Orden: mayor progreso</option>' +
+          '<option value="cerca"' + (estadoExplorador.orden === 'cerca' ? ' selected' : '') + '>Orden: más cerca de la meta</option>' +
+        '</select>' +
+        '<p class="contador-resultados" id="contador" aria-live="polite"></p>' +
+      '</div>' +
+    '</div>' +
+    '<div id="zona-resultados"></div>' +
+  '</div></section></div>';
+}
+
+function institucionesFiltradas() {
+  const q = estadoExplorador.q.trim().toLowerCase();
+  let lista = INSTITUCIONES.filter(i => {
+    const okCat = estadoExplorador.cat === 'todas' || i.categoria === estadoExplorador.cat;
+    const okQ = !q || i.nombre.toLowerCase().includes(q) || i.campana.titulo.toLowerCase().includes(q) || i.descripcion.toLowerCase().includes(q);
+    return okCat && okQ;
+  });
+  if (estadoExplorador.orden === 'progreso') {
+    lista = lista.slice().sort((a, b) => progresoDe(b) - progresoDe(a));
+  } else if (estadoExplorador.orden === 'cerca') {
+    lista = lista.slice().sort((a, b) => {
+      const ca = metaCumplida(a) ? 1 : 0, cb = metaCumplida(b) ? 1 : 0;
+      if (ca !== cb) return ca - cb;
+      return restanteDe(a) - restanteDe(b);
+    });
+  } else {
+    lista = lista.slice().sort((a, b) => {
+      const da = a.destacada ? 0 : 1, db = b.destacada ? 0 : 1;
+      if (da !== db) return da - db;
+      return progresoDe(b) - progresoDe(a);
+    });
+  }
+  return lista;
+}
+
+function renderResultados() {
+  const zona = $('#zona-resultados');
+  const contador = $('#contador');
+  if (!zona) return;
+  const lista = institucionesFiltradas();
+  if (contador) {
+    contador.innerHTML = lista.length === 1 ? '<strong>1</strong> campaña encontrada' : '<strong>' + lista.length + '</strong> campañas encontradas';
+  }
+  if (!lista.length) {
+    zona.innerHTML = '<div class="estado-vacio" role="status">' + ico('search') +
+      '<h3>No encontramos campañas con esos criterios</h3>' +
+      '<p>Probá con otra palabra o mirá todas las categorías disponibles.</p>' +
+      '<button class="boton boton--primario" type="button" data-accion="limpiar-filtros">' + ico('x') + 'Limpiar filtros</button></div>';
+    return;
+  }
+  zona.innerHTML = '<div class="grilla-inst">' + lista.map(tarjetaInstitucion).join('') + '</div>';
+  animarBarras(zona);
+}
+
+/* ============ VISTA: DETALLE DE INSTITUCIÓN ============ */
+function vistaDetalle(i) {
+  const pct = progresoDe(i);
+  const alcanzada = metaCumplida(i);
+  const proyeccion = sesion.proyeccion[i.id] || 0;
+
+  const cab =
+  '<div class="detalle-cab sobre-oscuro">' +
+    '<div class="detalle-cab__fondo arte--' + i.patron + '" style="--arte-color:' + i.color + '"></div>' +
+    '<div class="contenedor detalle-cab__inner">' +
+      '<nav class="migas" aria-label="Volver" style="color:#fff"><a href="#/instituciones" style="color:rgba(255,255,255,.9)">' + ico('flecha-i') + 'Todas las instituciones</a></nav>' +
+      '<div class="insignia-icono" style="color:' + i.color + '">' + ico(i.icono, 'ico--grande') + '</div>' +
+      '<h1 data-foco tabindex="-1">' + esc(i.nombre) + '</h1>' +
+      '<div class="detalle-cab__meta">' +
+        '<span class="chip-clara">' + esc(nombreCategoria(i.categoria)) + '</span>' +
+        (alcanzada ? '<span class="chip-clara">' + ico('check') + ' Meta alcanzada</span>' : '') +
+        '<span class="item">' + ico('pin') + esc(i.ubicacion) + '</span>' +
+      '</div>' +
+      '<p class="detalle-cab__desc">' + esc(i.descripcion) + '</p>' +
+    '</div>' +
+  '</div>';
+
+  const proyeccionHtml = proyeccion > 0
+    ? '<div class="proyeccion" role="note">' + ico('objetivo') +
+      '<span><strong>Proyección hipotética:</strong> si tu colaboración simulada de <strong>' + fmtARS(proyeccion) +
+      '</strong> fuera real, el avance pasaría del ' + fmtPct(pct) + ' al ' +
+      fmtPct(Math.round(((i.recaudado + proyeccion) / i.meta) * 10000) / 100) +
+      '. Los datos de la campaña no se modifican.</span></div>'
+    : '';
+
+  const lateral =
+  '<div class="detalle-lateral">' +
+    proyeccionHtml +
+    '<div class="panel" aria-labelledby="titulo-cifras">' +
+      '<h2 class="panel__titulo" id="titulo-cifras">' + ico('peso') + 'Avance de la campaña</h2>' +
+      '<div class="cifras">' +
+        '<div class="cifra cifra--destacada"><span class="cifra__rotulo">Recaudado (demo)</span><span class="cifra__valor">' + fmtARS(i.recaudado) + '</span></div>' +
+        '<div class="cifra"><span class="cifra__rotulo">Meta</span><span class="cifra__valor">' + fmtARS(i.meta) + '</span></div>' +
+        '<div class="cifra"><span class="cifra__rotulo">' + (alcanzada ? 'Excedente' : 'Falta') + '</span><span class="cifra__valor">' + (alcanzada ? fmtARS(i.recaudado - i.meta) : fmtARS(restanteDe(i))) + '</span></div>' +
+        '<div class="cifra"><span class="cifra__rotulo">Avance</span><span class="cifra__valor">' + fmtPct(pct) + '</span></div>' +
+      '</div>' +
+      '<div style="margin-top:1rem">' + barraProgreso(i, false) +
+        '<p style="font-size:.82rem;color:var(--tinta-2);margin:.5rem 0 0">' +
+        (pct > 100 ? '¡La meta se alcanzó! La barra se mantiene dentro de sus límites.' :
+         alcanzada ? 'La campaña llegó al 100 % de su meta de demostración.' :
+         'Faltan ' + fmtARS(restanteDe(i)) + ' para alcanzar la meta de ' + fmtARS(i.meta) + '.') +
+        '</p>' +
+      '</div>' +
+      '<div style="display:grid;gap:.7rem;margin-top:1.2rem">' +
+        '<a class="boton boton--primario boton--bloque" href="#/colaborar/' + esc(i.id) + '">' + ico('corazon') + 'Quiero colaborar</a>' +
+        '<button class="boton boton--contorno boton--bloque" type="button" data-accion="compartir" data-id="' + esc(i.id) + '">' + ico('copy') + 'Copiar enlace de la campaña</button>' +
+      '</div>' +
+    '</div>' +
+    avisoDemo('<strong>Demostración:</strong> las cifras de esta campaña son ficticias. Al simular una colaboración no se modifica la recaudación ni se realiza ningún cobro.') +
+  '</div>';
+
+  const objetivo =
+  '<section class="panel" aria-labelledby="titulo-objetivo">' +
+    '<h2 class="panel__titulo" id="titulo-objetivo">' + ico('objetivo') + 'El objetivo de esta campaña</h2>' +
+    '<p class="panel__sub">' + esc(i.campana.titulo) + '</p>' +
+    '<div class="narrativa">' +
+      '<div class="punto">' + ico('alerta') + '<span><strong>El problema:</strong> ' + esc(i.campana.problema) + '</span></div>' +
+      '<div class="punto">' + ico('corazon') + '<span><strong>Por qué importa:</strong> ' + esc(i.campana.porque) + '</span></div>' +
+      '<div class="punto">' + ico('check') + '<span><strong>Qué se hará con la meta:</strong> ' + esc(i.campana.alcance) + '</span></div>' +
+    '</div>' +
+  '</section>';
+
+  const presupuesto =
+  '<section class="panel" aria-labelledby="titulo-presu">' +
+    '<h2 class="panel__titulo" id="titulo-presu">' + ico('doc') + 'Destino previsto de los fondos</h2>' +
+    '<p class="panel__sub">Así se distribuiría el presupuesto de ' + fmtARS(i.meta) + ' si la campaña alcanza su meta. Es la <strong>planificación propuesta</strong>, no gastos ejecutados ni rendiciones reales.</p>' +
+    '<div class="presu">' +
+      i.presupuesto.map(item =>
+        '<div class="presu-item">' +
+          '<div class="presu__cab"><span class="presu__concepto">' + esc(item.concepto) + '</span><span class="presu__pct">' + fmtPct(item.porcentaje) + '</span></div>' +
+          '<div class="presu__pista" role="progressbar" aria-valuenow="' + item.porcentaje + '" aria-valuemin="0" aria-valuemax="100" aria-label="' + esc(item.concepto) + ': ' + fmtPct(item.porcentaje) + ' del presupuesto">' +
+            '<div class="presu__lleno" data-ancho="' + item.porcentaje + '%"></div></div>' +
+          '<p class="presu__monto">≈ ' + fmtARS(montoPresupuesto(i, item)) + '</p>' +
+          '<p class="presu__detalle">' + esc(item.detalle) + '</p>' +
+        '</div>').join('') +
+    '</div>' +
+  '</section>';
+
+  const actualizaciones =
+  '<section class="panel" aria-labelledby="titulo-act">' +
+    '<h2 class="panel__titulo" id="titulo-act">' + ico('calendario') + 'Actualizaciones del proyecto<span class="badge-demo">contenido de demostración</span></h2>' +
+    '<ol class="linea-tiempo">' +
+      i.actualizaciones.map(a =>
+        '<li class="evento"><span class="evento__punto" aria-hidden="true"></span>' +
+        '<span class="evento__fecha">' + esc(a.fecha) + '</span>' +
+        '<h4>' + esc(a.titulo) + '</h4><p>' + esc(a.texto) + '</p></li>').join('') +
+    '</ol>' +
+  '</section>';
+
+  const colaboradores =
+  '<section class="panel" aria-labelledby="titulo-colab">' +
+    '<h2 class="panel__titulo" id="titulo-colab">' + ico('usuarios') + 'Colaboradores</h2>' +
+    colaboradoresHtml(i) +
+  '</section>';
+
+  const ctaFija =
+  '<div class="cta-fija" role="complementary" aria-label="Acción principal">' +
+    '<div class="cta-fija__info">' +
+      (alcanzada
+        ? '<span>Meta de demostración cumplida</span><strong>' + fmtARS(i.recaudado) + '</strong>'
+        : '<span>Falta para la meta</span><strong>' + fmtARS(restanteDe(i)) + '</strong>') +
+    '</div>' +
+    '<a class="boton boton--primario" href="#/colaborar/' + esc(i.id) + '">' + ico('corazon') + 'Quiero colaborar</a>' +
+  '</div>';
+
+  return '<div class="vista">' + cab +
+    '<div class="contenedor detalle-cuerpo">' +
+      '<div class="detalle-col">' + objetivo + presupuesto + actualizaciones + colaboradores + '</div>' +
+      lateral +
+    '</div>' + ctaFija +
+  '</div>';
+}
+
+/* ============ VISTA: FLUJO DE COLABORACIÓN SIMULADA ============ */
+const flujo = { id: null, paso: 1, monto: null, otro: false, montoOtro: '', nombre: '', mensaje: '', mostrar: true, enCurso: false, confirmacion: null, errorMonto: '' };
+
+function montoElegido() {
+  if (!flujo.otro) return flujo.monto;
+  const n = Number(String(flujo.montoOtro).replace(/\./g, '').replace(',', '.'));
+  return Number.isFinite(n) ? Math.round(n) : NaN;
+}
+
+function reiniciarFlujo(id) {
+  flujo.id = id;
+  flujo.paso = 1;
+  flujo.monto = null;
+  flujo.otro = false;
+  flujo.montoOtro = '';
+  flujo.nombre = '';
+  flujo.mensaje = '';
+  flujo.mostrar = true;
+  flujo.enCurso = true;
+  flujo.confirmacion = null;
+}
+
+function indicadorPasos() {
+  const nombres = ['Importe', 'Tus datos', 'Revisión', 'Listo'];
+  return '<ol class="pasos" aria-label="Progreso del flujo de colaboración">' +
+    nombres.map((n, idx) => {
+      const num = idx + 1;
+      let clase = 'paso';
+      if (flujo.paso === 4) clase += ' paso--hecho';
+      else if (num < flujo.paso) clase += ' paso--hecho';
+      else if (num === flujo.paso) clase += ' paso--activo';
+      return '<li class="' + clase + '"' + (num === flujo.paso && flujo.paso < 4 ? ' aria-current="step"' : '') + '>' + n + '</li>';
+    }).join('') + '</ol>';
+}
+
+function opcionesMonto() {
+  const botones = APP.montosSugeridos.map(v =>
+    '<button class="monto-opt" type="button" data-accion="monto" data-valor="' + v + '" aria-pressed="' + (!flujo.otro && flujo.monto === v) + '">' + fmtARS(v) + '</button>').join('');
+  const otro = '<button class="monto-opt" type="button" data-accion="monto" data-valor="otro" aria-pressed="' + flujo.otro + '">' + ico('peso') + '<small>Otro importe</small></button>';
+  const campoOtro = flujo.otro
+    ? '<div class="campo' + (flujo.errorMonto ? ' campo--error' : '') + '">' +
+      '<label class="campo__etiqueta" for="monto-otro">Ingresá el importe (ARS)</label>' +
+      '<input type="number" id="monto-otro" inputmode="numeric" min="1" max="' + APP.limiteImporte + '" step="1" value="' + esc(flujo.montoOtro) + '" placeholder="Por ejemplo: 7500">' +
+      (flujo.errorMonto ? '<p class="error-texto" role="alert">' + ico('alerta') + esc(flujo.errorMonto) + '</p>' : '<p class="campo__ayuda">Entre $1 y ' + fmtARS(APP.limiteImporte) + ' (límite de la demostración).</p>') +
+      '</div>'
+    : '';
+  const notaAlcanzada = metaCumplida(porInstancia(flujo.id))
+    ? avisoDemo('Esta campaña ya alcanzó su meta. Tu simulación es válida igual: en una implementación real, los aportes excedentes podrían destinarse a mantenimiento del proyecto.')
+    : '';
+  return '<div class="tarjeta-flujo"><h2>Elegí cuánto querés colaborar</h2>' +
+    '<p>Simulá el aporte para <strong>' + esc(porInstancia(flujo.id).nombre) + '</strong>. Ningún valor es un precio ni una cuota: son importes de ejemplo para la demostración.</p>' +
+    '<div class="montos">' + botones + otro + '</div>' + campoOtro + notaAlcanzada +
+    '<div class="flujo-nav"><a class="flujo__volver" href="#/institucion/' + esc(flujo.id) + '">' + ico('flecha-i') + 'Volver a la campaña</a>' +
+    '<button class="boton boton--primario" type="button" data-accion="flujo-siguiente">Continuar ' + ico('flecha-d') + '</button></div>' +
+    '</div>';
+}
+
+function pasoDatos() {
+  return '<div class="tarjeta-flujo"><h2>Sumá tu nombre y un mensaje (opcional)</h2>' +
+    '<p>Todo es opcional y queda solo en la memoria de esta sesión: no se pide ni se guarda ningún dato personal.</p>' +
+    '<div class="campo"><label class="campo__etiqueta" for="dato-nombre">Nombre de pila o nombre visible <span class="opcional">(opcional)</span></label>' +
+    '<input type="text" id="dato-nombre" maxlength="40" autocomplete="off" value="' + esc(flujo.nombre) + '" placeholder="Por ejemplo: Martina">' +
+    '<p class="campo__ayuda">Si lo dejás vacío, tu colaboración se muestra como “Anónimo”.</p></div>' +
+    '<div class="campo"><label class="campo__etiqueta" for="dato-mensaje">Mensaje de apoyo <span class="opcional">(opcional)</span></label>' +
+    '<textarea id="dato-mensaje" maxlength="140" placeholder="Una palabra de aliento para la comunidad…">' + esc(flujo.mensaje) + '</textarea></div>' +
+    '<label class="checkbox"><input type="checkbox" id="dato-mostrar"' + (flujo.mostrar ? ' checked' : '') + '>' +
+    '<span><strong>Mostrar mi colaboración en el listado ficticio</strong><br>Podría verse en la campaña como ejemplo, con tu nombre o como anónimo.</span></label>' +
+    '<div class="flujo-nav"><button class="boton boton--fantasma" type="button" data-accion="flujo-atras">' + ico('flecha-i') + 'Atrás</button>' +
+    '<button class="boton boton--primario" type="button" data-accion="flujo-siguiente">Revisar colaboración ' + ico('flecha-d') + '</button></div>' +
+    '</div>';
+}
+
+function pasoRevision() {
+  const i = porInstancia(flujo.id);
+  const m = montoElegido();
+  return '<div class="tarjeta-flujo"><h2>Revisá tu colaboración simulada</h2>' +
+    '<p>Confirmá que todo esté como querés. Esto es una demostración: no se realizará ningún cobro.</p>' +
+    '<dl class="resumen">' +
+      '<div class="resumen__fila"><dt>Institución</dt><dd>' + esc(i.nombre) + '</dd></div>' +
+      '<div class="resumen__fila"><dt>Campaña</dt><dd>' + esc(i.campana.titulo) + '</dd></div>' +
+      '<div class="resumen__fila"><dt>Importe simulado</dt><dd>' + fmtARS(m) + '</dd></div>' +
+      '<div class="resumen__fila"><dt>Colaborador/a</dt><dd>' + esc(flujo.nombre.trim() || 'Anónimo') + '</dd></div>' +
+      (flujo.mensaje.trim() ? '<div class="resumen__fila"><dt>Mensaje</dt><dd>“' + esc(flujo.mensaje.trim()) + '”</dd></div>' : '') +
+      '<div class="resumen__fila"><dt>Mostrar en el listado</dt><dd>' + (flujo.mostrar ? 'Sí, como ejemplo' : 'No') + '</dd></div>' +
+    '</dl>' +
+    avisoDemo('<strong>Estás utilizando una demostración.</strong> No se realizará ningún cobro ni se transferirá dinero. Los datos quedan solo en esta pestaña del navegador.') +
+    '<div class="flujo-nav"><button class="boton boton--fantasma" type="button" data-accion="flujo-atras">' + ico('flecha-i') + 'Atrás</button>' +
+    '<button class="boton boton--primario" type="button" data-accion="flujo-confirmar">' + ico('corazon') + 'Simular colaboración</button></div>' +
+    '</div>';
+}
+
+function pasoConfirmacion() {
+  const i = porInstancia(flujo.id);
+  const c = flujo.confirmacion;
+  return '<div class="tarjeta-flujo" style="text-align:center">' +
+    '<div class="exito-cab">' +
+      '<svg class="exito-anim" viewBox="0 0 100 100" role="img" aria-label="Colaboración simulada registrada">' +
+        '<circle class="exito-circulo" cx="50" cy="50" r="48" fill="none" stroke="#70C6A7" stroke-width="4"/>' +
+        '<path class="exito-check" d="M30 52l14 14 26-30" fill="none" stroke="#1E766E" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>' +
+      '</svg>' +
+      '<h1 data-foco tabindex="-1">¡Gracias por querer ser parte del cambio!</h1>' +
+      '<p>Tu colaboración es una muestra de lo que podemos lograr cuando trabajamos juntos.</p>' +
+    '</div>' +
+    '<div class="comprobante" role="note" aria-label="Comprobante de demostración">' +
+      '<div class="comprobante__cab">' + ico('doc') + 'Comprobante de demostración</div>' +
+      '<div class="comprobante__cuerpo">' +
+        '<div class="comprobante__fila"><span>N.º de operación</span><strong>' + esc(c.numero) + '</strong></div>' +
+        '<div class="comprobante__fila"><span>Institución</span><strong>' + esc(i.nombre) + '</strong></div>' +
+        '<div class="comprobante__fila"><span>Campaña</span><strong>' + esc(i.campana.titulo) + '</strong></div>' +
+        '<div class="comprobante__fila"><span>Importe simulado</span><strong>' + fmtARS(c.monto) + '</strong></div>' +
+        '<div class="comprobante__fila"><span>Colaborador/a</span><strong>' + esc(c.nombre) + '</strong></div>' +
+        '<div class="comprobante__fila"><span>Fecha local</span><strong>' + esc(c.fecha) + '</strong></div>' +
+      '</div>' +
+      '<span class="sello">' + ico('alerta') + 'Simulación — sin pago real</span>' +
+      '<div class="comprobante__pie">Este número se generó localmente en tu navegador para la demostración. No corresponde a una transacción financiera real ni modifica la recaudación de la campaña.</div>' +
+    '</div>' +
+    '<div class="exito-acciones">' +
+      '<a class="boton boton--primario" href="#/institucion/' + esc(i.id) + '">Volver a la campaña</a>' +
+      '<a class="boton boton--contorno" href="#/inicio">' + ico('home') + 'Ir al inicio</a>' +
+    '</div>' +
+    '<div style="margin-top:.7rem"><button class="boton boton--fantasma boton--compacto" type="button" data-accion="flujo-reiniciar">' + ico('qr') + 'Simular otra colaboración a esta campaña</button></div>' +
+    '</div>';
+}
+
+function vistaColaborar(i) {
+  if (!flujo.enCurso || flujo.id !== i.id) reiniciarFlujo(i.id);
+  const contenido = flujo.paso === 1 ? opcionesMonto()
+    : flujo.paso === 2 ? pasoDatos()
+    : flujo.paso === 3 ? pasoRevision()
+    : pasoConfirmacion();
+  const cabecera = flujo.paso === 4
+    ? ''
+    : '<div class="flujo__cab"><span class="boca">' + esc(APP.nombre) + ' · Demostración</span>' +
+      '<h1 data-foco tabindex="-1">Colaborar con ' + esc(i.nombre) + '</h1>' +
+      '<p>' + esc(i.campana.titulo) + '</p></div>';
+  return '<div class="vista"><div class="contenedor"><div class="flujo">' + cabecera + indicadorPasos() + contenido + '</div></div></div>';
+}
+
+/* ============ VISTA: PREGUNTAS FRECUENTES ============ */
+const FAQ = [
+  { p: '¿Esto es una aplicación real de donaciones?', r: 'No. Es un prototipo conceptual para presentar una idea a la Municipalidad de Las Toscas. Las instituciones, campañas y cifras son ficticias y no se procesan pagos ni se reciben donaciones de ningún tipo.' },
+  { p: '¿Cómo llegaría una persona a la página de una institución?', r: 'En la versión real, cada institución tendría un código QR en su entrada. Al escanearlo con el celular, se abriría directamente la página de su campaña (por ejemplo, index.html?institucion=escuela-101). En este prototipo podés simularlo desde la sección de demostración de la página de inicio.' },
+  { p: '¿Necesito registrarme o dar mis datos?', r: 'No. El flujo de colaboración solo pide un nombre visible y un mensaje, ambos opcionales, y no se solicitan DNI, correo, teléfono ni datos bancarios. Todo lo que se escribe queda únicamente en la memoria de la sesión.' },
+  { p: '¿Qué pasa si una campaña supera el 100 % de su meta?', r: 'La barra de progreso se mantiene visualmente dentro de sus límites y la interfaz informa que la meta fue alcanzada. En una implementación real podría definirse, por ejemplo, destinar los aportes excedentes al mantenimiento del proyecto.' },
+  { p: '¿En qué se usaría el dinero en una implementación real?', r: 'Cada campaña muestra el destino previsto de los fondos con porcentajes y montos estimados. Esa información representaría la planificación propuesta de la institución, no gastos ejecutados. Las rendiciones públicas serían parte de una futura implementación municipal.' },
+  { p: '¿El prototipo guarda o envía información?', r: 'No. Todo funciona dentro de tu navegador, sin conexión a servidores, bases de datos ni servicios externos. Al cerrar la pestaña, las colaboraciones simuladas desaparecen.' }
+];
+
+function vistaPreguntas() {
+  return '<div class="vista"><section class="seccion" aria-labelledby="titulo-faq"><div class="contenedor">' +
+    '<div class="seccion__cab"><div>' +
+      '<span class="boca">Ayuda</span>' +
+      '<h1 class="titulo-2" id="titulo-faq" data-foco tabindex="-1">Preguntas frecuentes</h1>' +
+    '</div></div>' +
+    '<div class="faq">' +
+      FAQ.map(item => '<details><summary>' + esc(item.p) + ico('chevron') + '</summary><p>' + esc(item.r) + '</p></details>').join('') +
+    '</div>' +
+    avisoDemo('<strong>Recordatorio:</strong> este prototipo es una demostración con datos ficticios; no procesa pagos ni recibe donaciones.') +
+  '</div></section></div>';
+}
+
+/* ============ VISTA: INSTITUCIÓN NO ENCONTRADA ============ */
+function vistaNoEncontrado(idIntento) {
+  return '<div class="vista"><section class="seccion" aria-labelledby="titulo-404"><div class="contenedor" style="max-width:640px">' +
+    '<div class="estado-vacio">' + ico('qr') +
+      '<h1 class="titulo-2" id="titulo-404" data-foco tabindex="-1" style="font-size:1.35rem">No encontramos esa campaña</h1>' +
+      '<p>' + (idIntento ? 'La dirección <code>' + esc(idIntento) + '</code> no corresponde a ninguna institución de la demostración.' : 'La página que buscás no existe en este prototipo.') + '</p>' +
+      '<div style="display:flex;gap:.7rem;justify-content:center;flex-wrap:wrap">' +
+        '<a class="boton boton--primario" href="#/instituciones">' + ico('usuarios') + 'Ver las instituciones</a>' +
+        '<a class="boton boton--contorno" href="#/inicio">' + ico('home') + 'Volver al inicio</a>' +
+      '</div>' +
+    '</div>' +
+  '</div></section></div>';
+}
+
+/* ============ ANIMACIÓN DE BARRAS ============ */
+function animarBarras(cont) {
+  const barras = $$('[data-ancho]', cont);
+  const mostrar = el => { el.style.width = el.dataset.ancho; };
+  if (!('IntersectionObserver' in window) || reduceMov()) { barras.forEach(mostrar); return; }
+  const io = new IntersectionObserver(entradas => {
+    entradas.forEach(e => { if (e.isIntersecting) { mostrar(e.target); io.unobserve(e.target); } });
+  }, { threshold: 0.25 });
+  barras.forEach(b => { b.style.width = '0'; io.observe(b); });
+}
+
+/* ============ ROUTER ============ */
+function rutaActual() {
+  const partes = location.hash.replace(/^#\/?/, '').split('/').filter(Boolean);
+  if (!partes.length) return { vista: 'inicio', clave: 'inicio' };
+  switch (partes[0]) {
+    case 'inicio': return { vista: 'inicio', clave: 'inicio' };
+    case 'como-funciona': return { vista: 'inicio', clave: 'como', ancla: 'como-funciona' };
+    case 'instituciones': return { vista: 'explorador', clave: 'instituciones' };
+    case 'preguntas': return { vista: 'preguntas', clave: 'preguntas' };
+    case 'institucion':
+    case 'colaborar': {
+      const i = porInstancia(partes[1]);
+      if (!i) return { vista: 'no-encontrado', clave: '', id: partes[1] || '' };
+      return { vista: partes[0] === 'colaborar' ? 'colaborar' : 'detalle', clave: '', id: i.id };
+    }
+    default: return { vista: 'no-encontrado', clave: '', id: '' };
+  }
+}
+
+function htmlNavActiva(ruta) {
+  $$('.nav__enlace').forEach(a => {
+    if (a.dataset.rutaNav === ruta.clave) a.setAttribute('aria-current', 'page');
+    else a.removeAttribute('aria-current');
+  });
+}
+
+function cerrarMenu() {
+  const nav = $('#nav-principal');
+  const boton = $('.menu-boton');
+  if (!nav || !boton) return;
+  nav.classList.remove('nav--abierta');
+  boton.setAttribute('aria-expanded', 'false');
+  boton.setAttribute('aria-label', 'Abrir menú de navegación');
+}
+
+function toggleMenu() {
+  const nav = $('#nav-principal');
+  const boton = $('.menu-boton');
+  if (!nav || !boton) return;
+  const abierto = nav.classList.toggle('nav--abierta');
+  boton.setAttribute('aria-expanded', String(abierto));
+  boton.setAttribute('aria-label', abierto ? 'Cerrar menú de navegación' : 'Abrir menú de navegación');
+}
+
+let ultimaVista = '';
+function render() {
+  const main = $('#contenido');
+  if (!main) return;
+  const ruta = rutaActual();
+  let html = '';
+  if (ruta.vista === 'inicio') html = vistaInicio();
+  else if (ruta.vista === 'explorador') html = vistaExplorador();
+  else if (ruta.vista === 'preguntas') html = vistaPreguntas();
+  else if (ruta.vista === 'detalle') html = vistaDetalle(porInstancia(ruta.id));
+  else if (ruta.vista === 'colaborar') html = vistaColaborar(porInstancia(ruta.id));
+  else html = vistaNoEncontrado(ruta.id);
+
+  main.innerHTML = html;
+  htmlNavActiva(ruta);
+  cerrarMenu();
+
+  const nuevaVista = ruta.vista + ':' + (ruta.id || '') + ':' + (ruta.ancla || '');
+  if (ultimaVista !== nuevaVista && !ruta.ancla) window.scrollTo(0, 0);
+  ultimaVista = nuevaVista;
+
+  if (ruta.vista === 'explorador') renderResultados();
+  if (ruta.vista === 'inicio') conectarQrDemo();
+  animarBarras(main);
+
+  const foco = $('[data-foco]', main);
+  if (foco) {
+    try { foco.focus({ preventScroll: true }); } catch (e) { foco.focus(); }
+  }
+  if (ruta.ancla) {
+    const destino = document.getElementById(ruta.ancla);
+    if (destino) {
+      window.setTimeout(() => destino.scrollIntoView({ behavior: reduceMov() ? 'auto' : 'smooth', block: 'start' }), 60);
+    }
+  }
+}
+
+function ir(ruta) {
+  const destino = '#/' + ruta;
+  if (location.hash === destino) render();
+  else location.hash = destino;
+}
+
+/* ============ LÓGICA DEL FLUJO ============ */
+function validarMonto() {
+  if (!flujo.otro && flujo.monto === null) return 'Elegí un importe o seleccioná “Otro importe”.';
+  if (!flujo.otro) return '';
+  const m = montoElegido();
+  if (!Number.isFinite(m) || m <= 0) return 'Ingresá un importe mayor que cero.';
+  if (m > APP.limiteImporte) return 'Para la demostración el importe máximo es ' + fmtARS(APP.limiteImporte) + '.';
+  return '';
+}
+
+function actualizarFlujo(html) {
+  const zona = $('.flujo');
+  if (zona) {
+    zona.innerHTML = (flujo.paso === 4 ? '' :
+      '<div class="flujo__cab"><span class="boca">' + esc(APP.nombre) + ' · Demostración</span>' +
+      '<h1 data-foco tabindex="-1">Colaborar con ' + esc(porInstancia(flujo.id).nombre) + '</h1>' +
+      '<p>' + esc(porInstancia(flujo.id).campana.titulo) + '</p></div>') + indicadorPasos() + html;
+    const foco = $('[data-foco]', zona);
+    if (foco) { try { foco.focus({ preventScroll: true }); } catch (e) { foco.focus(); } }
+  } else {
+    render();
+  }
+}
+
+function elegirMonto(el) {
+  const v = el.dataset.valor;
+  flujo.errorMonto = '';
+  if (v === 'otro') {
+    flujo.otro = true;
+  } else {
+    flujo.otro = false;
+    flujo.monto = Number(v);
+    flujo.montoOtro = '';
+  }
+  actualizarFlujo(opcionesMonto());
+  if (flujo.otro) { const inp = $('#monto-otro'); if (inp) inp.focus(); }
+}
+
+function flujoSiguiente() {
+  if (flujo.paso === 1) {
+    const error = validarMonto();
+    if (error) {
+      flujo.errorMonto = flujo.otro ? error : 'Elegí un importe para continuar.';
+      actualizarFlujo(opcionesMonto());
+      if (!flujo.otro) toast('Primero elegí un importe', 'info');
+      return;
+    }
+    flujo.errorMonto = '';
+    flujo.paso = 2;
+    actualizarFlujo(pasoDatos());
+    return;
+  }
+  if (flujo.paso === 2) {
+    const nombre = $('#dato-nombre');
+    const mensaje = $('#dato-mensaje');
+    const mostrar = $('#dato-mostrar');
+    if (nombre) flujo.nombre = nombre.value.slice(0, 40);
+    if (mensaje) flujo.mensaje = mensaje.value.slice(0, 140);
+    if (mostrar) flujo.mostrar = mostrar.checked;
+    flujo.paso = 3;
+    actualizarFlujo(pasoRevision());
+    return;
+  }
+}
+
+function flujoAtras() {
+  if (flujo.paso === 2) { flujo.paso = 1; actualizarFlujo(opcionesMonto()); }
+  else if (flujo.paso === 3) { flujo.paso = 2; actualizarFlujo(pasoDatos()); }
+}
+
+function flujoConfirmar() {
+  const m = montoElegido();
+  if (!Number.isFinite(m) || m <= 0 || m > APP.limiteImporte) { flujo.paso = 1; actualizarFlujo(opcionesMonto()); return; }
+  const ahora = new Date();
+  flujo.confirmacion = {
+    numero: generarNumeroOperacion(),
+    monto: m,
+    nombre: flujo.nombre.trim() || 'Anónimo',
+    fecha: ahora.toLocaleString('es-AR', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+  };
+  if (flujo.mostrar) {
+    sesion.colaboradores.push({ id: flujo.id, nombre: flujo.nombre.trim(), monto: m, mensaje: flujo.mensaje.trim() });
+  }
+  sesion.proyeccion[flujo.id] = (sesion.proyeccion[flujo.id] || 0) + m;
+  flujo.paso = 4;
+  flujo.enCurso = false;
+  actualizarFlujo(pasoConfirmacion());
+}
+
+/* ============ DEMO QR (página de inicio) ============ */
+function conectarQrDemo() {
+  const selector = $('#qr-selector');
+  if (!selector) return;
+  const sincronizar = () => {
+    const id = selector.value;
+    const lienzo = $('#qr-lienzo');
+    const enlace = $('#qr-enlace-real');
+    const ruta = $('#qr-ruta');
+    if (lienzo) lienzo.innerHTML = qrIlustrativo(id);
+    if (enlace) enlace.setAttribute('href', 'index.html?institucion=' + encodeURIComponent(id));
+    if (ruta) ruta.textContent = 'index.html?institucion=' + id;
+  };
+  selector.addEventListener('change', sincronizar);
+  sincronizar();
+}
+
+/* ============ EVENTOS GLOBALES ============ */
+document.addEventListener('click', e => {
+  const el = e.target.closest('[data-accion]');
+  if (!el) return;
+  const acc = el.dataset.accion;
+  switch (acc) {
+    case 'menu': toggleMenu(); break;
+    case 'cerrar-cinta': { const cinta = $('#cinta-demo'); if (cinta) cinta.remove(); break; }
+    case 'abrir-inst': {
+      if (e.target.closest('a,button')) return;
+      ir('institucion/' + el.dataset.id);
+      break;
+    }
+    case 'filtro-cat': {
+      estadoExplorador.cat = el.dataset.cat;
+      $$('.chip[data-accion="filtro-cat"]').forEach(c => c.setAttribute('aria-pressed', String(c === el)));
+      renderResultados();
+      break;
+    }
+    case 'limpiar-busqueda': {
+      estadoExplorador.q = '';
+      const inp = $('#buscador');
+      if (inp) { inp.value = ''; inp.focus(); }
+      const btn = $('.campo-busqueda__limpiar');
+      if (btn) btn.classList.add('sr-solo');
+      renderResultados();
+      break;
+    }
+    case 'limpiar-filtros': {
+      estadoExplorador.q = ''; estadoExplorador.cat = 'todas'; estadoExplorador.orden = 'relevancia';
+      const inp = $('#buscador'); if (inp) inp.value = '';
+      const ord = $('#orden'); if (ord) ord.value = 'relevancia';
+      $$('.chip[data-accion="filtro-cat"]').forEach(c => c.setAttribute('aria-pressed', String(c.dataset.cat === 'todas')));
+      const btn = $('.campo-busqueda__limpiar'); if (btn) btn.classList.add('sr-solo');
+      renderResultados();
+      break;
+    }
+    case 'qr-simular': {
+      const sel = $('#qr-selector');
+      if (sel && sel.value) { toast('Acceso simulado desde el QR de ' + (porInstancia(sel.value) || {}).nombre); ir('institucion/' + sel.value); }
+      break;
+    }
+    case 'qr-copiar': {
+      const sel = $('#qr-selector');
+      if (sel && sel.value) copiarTexto('index.html?institucion=' + sel.value);
+      break;
+    }
+    case 'compartir': {
+      copiarTexto('index.html?institucion=' + el.dataset.id);
+      break;
+    }
+    case 'monto': elegirMonto(el); break;
+    case 'flujo-siguiente': flujoSiguiente(); break;
+    case 'flujo-atras': flujoAtras(); break;
+    case 'flujo-confirmar': flujoConfirmar(); break;
+    case 'flujo-reiniciar': {
+      const id = flujo.id;
+      reiniciarFlujo(id);
+      actualizarFlujo(opcionesMonto());
+      break;
+    }
+  }
+});
+
+document.addEventListener('input', e => {
+  const t = e.target;
+  if (t && t.id === 'buscador') {
+    estadoExplorador.q = t.value;
+    const btn = $('.campo-busqueda__limpiar');
+    if (btn) btn.classList.toggle('sr-solo', !t.value);
+    renderResultados();
+  }
+  if (t && t.id === 'monto-otro') {
+    flujo.montoOtro = t.value;
+    flujo.errorMonto = '';
+  }
+});
+
+document.addEventListener('change', e => {
+  const t = e.target;
+  if (t && t.id === 'orden') {
+    estadoExplorador.orden = t.value;
+    renderResultados();
+  }
+});
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') cerrarMenu();
+});
+
+window.addEventListener('hashchange', render);
+
+/* ============ INICIALIZACIÓN ============ */
+function iniciar() {
+  // Simulación de acceso por QR: index.html?institucion=escuela-101
+  let idQr = null;
+  try {
+    const params = new URLSearchParams(location.search);
+    idQr = params.get('institucion');
+  } catch (e) { idQr = null; }
+
+  if (idQr) {
+    // El router valida el id: muestra el detalle si existe, o la vista "no encontrada" si no.
+    location.hash = '#/institucion/' + encodeURIComponent(idQr);
+  }
+  render();
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', iniciar);
+} else {
+  iniciar();
+}
+
+</script>
+</body>
+</html>
